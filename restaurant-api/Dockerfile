@@ -34,6 +34,10 @@ RUN set -eux; \
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+# Start Apache through a wrapper that normalizes the loaded MPM modules first
+COPY docker/start-apache.sh /usr/local/bin/start-apache.sh
+RUN chmod +x /usr/local/bin/start-apache.sh
+
 WORKDIR /var/www/html
 
 COPY . .
@@ -43,3 +47,5 @@ RUN composer install --no-dev --optimize-autoloader
 RUN mkdir -p /var/www/html/writable && chown -R www-data:www-data /var/www/html/writable
 
 EXPOSE 80
+
+CMD ["start-apache.sh"]
