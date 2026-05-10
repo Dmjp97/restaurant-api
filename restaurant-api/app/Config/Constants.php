@@ -24,3 +24,14 @@ defined('EXIT_USER_INPUT')     || define('EXIT_USER_INPUT', 7);
 defined('EXIT_DATABASE')       || define('EXIT_DATABASE', 8);
 defined('EXIT__AUTO_MIN')      || define('EXIT__AUTO_MIN', 9);
 defined('EXIT__AUTO_MAX')      || define('EXIT__AUTO_MAX', 125);
+
+defined('CodeIgniter\\EXIT_SUCCESS')        || define('CodeIgniter\\EXIT_SUCCESS', EXIT_SUCCESS);
+defined('CodeIgniter\\EXIT_ERROR')          || define('CodeIgniter\\EXIT_ERROR', EXIT_ERROR);
+defined('CodeIgniter\\EXIT_CONFIG')         || define('CodeIgniter\\EXIT_CONFIG', EXIT_CONFIG);
+defined('CodeIgniter\\EXIT_UNKNOWN_FILE')   || define('CodeIgniter\\EXIT_UNKNOWN_FILE', EXIT_UNKNOWN_FILE);
+defined('CodeIgniter\\EXIT_UNKNOWN_CLASS')  || define('CodeIgniter\\EXIT_UNKNOWN_CLASS', EXIT_UNKNOWN_CLASS);
+defined('CodeIgniter\\EXIT_UNKNOWN_METHOD') || define('CodeIgniter\\EXIT_UNKNOWN_METHOD', EXIT_UNKNOWN_METHOD);
+defined('CodeIgniter\\EXIT_USER_INPUT')     || define('CodeIgniter\\EXIT_USER_INPUT', EXIT_USER_INPUT);
+defined('CodeIgniter\\EXIT_DATABASE')       || define('CodeIgniter\\EXIT_DATABASE', EXIT_DATABASE);
+defined('CodeIgniter\\EXIT__AUTO_MIN')      || define('CodeIgniter\\EXIT__AUTO_MIN', EXIT__AUTO_MIN);
+defined('CodeIgniter\\EXIT__AUTO_MAX')      || define('CodeIgniter\\EXIT__AUTO_MAX', EXIT__AUTO_MAX);

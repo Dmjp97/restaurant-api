@@ -33,9 +33,13 @@ if (! defined('CodeIgniter\\COMPOSER_PATH')) {
 	define('CodeIgniter\\COMPOSER_PATH', COMPOSER_PATH);
 }
 
-if (empty($_SERVER['CI_ENVIRONMENT'])) {
-	$_SERVER['CI_ENVIRONMENT'] = getenv('CI_ENVIRONMENT') ?: 'production';
+$ciEnv = getenv('CI_ENVIRONMENT') ?: ($_SERVER['CI_ENVIRONMENT'] ?? 'production');
+if (! in_array($ciEnv, ['production', 'development', 'testing'], true)) {
+	$ciEnv = 'production';
 }
+putenv("CI_ENVIRONMENT={$ciEnv}");
+$_ENV['CI_ENVIRONMENT'] = $ciEnv;
+$_SERVER['CI_ENVIRONMENT'] = $ciEnv;
 
 if (getcwd() . DIRECTORY_SEPARATOR !== FCPATH) {
 	chdir(FCPATH);
