@@ -98,7 +98,7 @@ class App extends BaseConfig
     public bool $CSRFCookieSecure = false;
     public bool $CSRFCookieHTTPOnly = true;
     public string $CSRFCookieSameSite = 'Lax';
-    public int $CSRFHeaderName = 'X-CSRF-TOKEN';
+    public string $CSRFHeaderName = 'X-CSRF-TOKEN';
 
     /**
      * CORS Settings
