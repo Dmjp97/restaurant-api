@@ -5,8 +5,8 @@
  */
 
 // Determine the current environment
-define('CI_DEBUG', (ENVIRONMENT !== 'production'));
 define('ENVIRONMENT', getenv('CI_ENVIRONMENT') ?: 'development');
+define('CI_DEBUG', (ENVIRONMENT !== 'production'));
 
 /**
  * For backwards compatibility with CodeIgniter 4.0.0-beta.0

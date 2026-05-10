@@ -11,10 +11,14 @@ class App extends BaseConfig
     public string $indexPage = '';
     public string $uriProtocol = 'REQUEST_URI';
     public bool $allowQueryStringUriSegments = false;
-    public string $environment = ENVIRONMENT ?? 'production';
+    public string $defaultLocale = 'en';
+    public bool $negotiateLocale = false;
+    public array $supportedLocales = ['en'];
     public string $appTimezone = 'UTC';
-    public array $handlers = [];
-    public array $cookiePrefix = '';
+    public string $charset = 'UTF-8';
+    public bool $forceGlobalSecureRequests = false;
+    public string $cookiePrefix = '';
+    public int $cookieExpires = 0;
     public string $cookieDomain = '';
     public string $cookiePath = '/';
     public bool $cookieSecure = false;
