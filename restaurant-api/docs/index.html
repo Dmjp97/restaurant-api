@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Restaurant API Platform — Multi-tenant PHP/CodeIgniter 4</title>
+  <meta name="description" content="Production-grade multi-tenant REST API for restaurant chains. PHP 8.2 · CodeIgniter 4 · JWT · RBAC · Redis · Docker." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --green:   #00e87a;
+      --green-dim: #00994f;
+      --amber:   #f0a500;
+      --red:     #ff4d6d;
+      --blue:    #38bdf8;
+      --bg:      #060a06;
+      --bg2:     #0c130c;
+      --bg3:     #111911;
+      --border:  #1e2e1e;
+      --text:    #c8dac8;
+      --text-dim:#6b8a6b;
+      --mono:    'JetBrains Mono', monospace;
+      --serif:   'Playfair Display', serif;
+      --sans:    'DM Sans', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── GRAIN OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; opacity: 0.6;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 2rem;
+      background: rgba(6,10,6,.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--green);
+      letter-spacing: .1em;
+      text-decoration: none;
+    }
+    .nav-logo span { color: var(--text-dim); }
+    .nav-links { display: flex; gap: 1.5rem; align-items: center; }
+    .nav-links a {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text-dim);
+      text-decoration: none;
+      letter-spacing: .06em;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--green); }
+    .nav-cta {
+      font-family: var(--mono) !important;
+      font-size: 12px !important;
+      color: var(--bg) !important;
+      background: var(--green);
+      padding: 6px 16px;
+      border-radius: 4px;
+      font-weight: 700 !important;
+      transition: opacity .2s !important;
+    }
+    .nav-cta:hover { opacity: .85; color: var(--bg) !important; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+      padding: 8rem 6rem 5rem;
+      position: relative;
+      z-index: 1;
+    }
+    .hero-eyebrow {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .2em;
+      color: var(--green);
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .hero-eyebrow::before {
+      content: '';
+      display: inline-block;
+      width: 32px; height: 1px;
+      background: var(--green);
+    }
+    h1 {
+      font-family: var(--serif);
+      font-size: clamp(2.5rem, 4vw, 4rem);
+      font-weight: 900;
+      line-height: 1.1;
+      color: #e8f5e8;
+      margin-bottom: 1.5rem;
+    }
+    h1 em {
+      font-style: normal;
+      color: var(--green);
+      position: relative;
+    }
+    h1 em::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0; bottom: -4px;
+      height: 2px;
+      background: var(--green);
+      opacity: .4;
+    }
+    .hero-desc {
+      font-size: 17px;
+      color: var(--text-dim);
+      max-width: 480px;
+      margin-bottom: 2.5rem;
+      line-height: 1.8;
+    }
+    .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 14px 28px;
+      background: var(--green);
+      color: var(--bg);
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 700;
+      border-radius: 6px;
+      text-decoration: none;
+      letter-spacing: .06em;
+      transition: transform .15s, box-shadow .15s;
+      box-shadow: 0 0 32px rgba(0,232,122,.15);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 48px rgba(0,232,122,.3);
+    }
+    .btn-secondary {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 14px 28px;
+      background: transparent;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 13px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      text-decoration: none;
+      letter-spacing: .06em;
+      transition: border-color .2s, color .2s;
+    }
+    .btn-secondary:hover { border-color: var(--green); color: var(--green); }
+
+    /* ── TERMINAL ── */
+    .terminal-wrap { position: relative; }
+    .terminal {
+      background: #080e08;
+      border: 1px solid #1a2e1a;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 40px 80px rgba(0,0,0,.8), 0 0 0 1px rgba(0,232,122,.04), inset 0 1px 0 rgba(0,232,122,.06);
+    }
+    .terminal-bar {
+      background: #0d160d;
+      padding: 12px 16px;
+      display: flex; align-items: center; gap: 8px;
+      border-bottom: 1px solid #1a2e1a;
+    }
+    .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .dot-r { background: #ff5f56; }
+    .dot-y { background: #ffbd2e; }
+    .dot-g { background: #27c93f; }
+    .terminal-title {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-left: auto; margin-right: auto;
+    }
+    .terminal-body {
+      padding: 1.5rem;
+      font-family: var(--mono);
+      font-size: 12.5px;
+      line-height: 1.8;
+      min-height: 380px;
+    }
+    .t-line { display: flex; gap: 8px; opacity: 0; animation: fadein .1s forwards; }
+    .t-prompt { color: var(--green-dim); flex-shrink: 0; }
+    .t-cmd { color: #e8f5e8; }
+    .t-comment { color: var(--text-dim); }
+    .t-json { color: #e8f5e8; }
+    .t-key { color: var(--blue); }
+    .t-str { color: var(--amber); }
+    .t-num { color: #f97316; }
+    .t-bool { color: var(--red); }
+    .t-ok { color: var(--green); font-weight: 700; }
+    .t-blank { height: .5rem; }
+    .cursor { display: inline-block; width: 8px; height: 14px; background: var(--green); animation: blink 1s step-end infinite; vertical-align: text-bottom; margin-left: 2px; }
+    @keyframes blink { 50% { opacity: 0; } }
+    @keyframes fadein { to { opacity: 1; } }
+
+    /* ── STATS STRIP ── */
+    .stats-strip {
+      display: flex; justify-content: center; gap: 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg2);
+      position: relative; z-index: 1;
+    }
+    .stat {
+      flex: 1; max-width: 200px;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      border-right: 1px solid var(--border);
+    }
+    .stat:last-child { border-right: none; }
+    .stat-num {
+      font-family: var(--serif);
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: var(--green);
+      line-height: 1;
+      margin-bottom: .25rem;
+    }
+    .stat-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-dim);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    /* ── SECTIONS ── */
+    section { position: relative; z-index: 1; }
+    .section-inner { max-width: 1200px; margin: 0 auto; padding: 7rem 3rem; }
+    .section-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .25em;
+      color: var(--green-dim);
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+    h2 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 3vw, 2.8rem);
+      font-weight: 900;
+      color: #e8f5e8;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+    }
+    .section-desc { font-size: 17px; color: var(--text-dim); max-width: 560px; line-height: 1.8; margin-bottom: 4rem; }
+
+    /* ── ARCHITECTURE ── */
+    .arch-section { background: var(--bg2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .arch-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center; }
+    .arch-diagram {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      font-family: var(--mono);
+      font-size: 13px;
+    }
+    .arch-layer {
+      display: flex; align-items: center;
+      gap: 1rem; padding: 1rem 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      background: var(--bg);
+      transition: border-color .3s, box-shadow .3s;
+      cursor: default;
+      position: relative;
+      overflow: hidden;
+    }
+    .arch-layer::before {
+      content: '';
+      position: absolute; left: 0; top: 0; bottom: 0;
+      width: 3px;
+      background: var(--green);
+      opacity: 0;
+      transition: opacity .3s;
+    }
+    .arch-layer:hover { border-color: var(--green-dim); box-shadow: 0 0 24px rgba(0,232,122,.08); }
+    .arch-layer:hover::before { opacity: 1; }
+    .arch-icon { font-size: 20px; }
+    .arch-name { color: #e8f5e8; font-weight: 700; flex: 1; }
+    .arch-tech { color: var(--text-dim); font-size: 11px; }
+    .arch-arrow {
+      text-align: center;
+      color: var(--green-dim);
+      font-size: 18px;
+      margin: -2px 0;
+      opacity: .5;
+    }
+    .arch-features { display: flex; flex-direction: column; gap: 1.5rem; }
+    .arch-feat { display: flex; gap: 1rem; }
+    .arch-feat-icon {
+      width: 40px; height: 40px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+      background: var(--bg);
+    }
+    .arch-feat-title { font-size: 15px; font-weight: 500; color: #e8f5e8; margin-bottom: 4px; }
+    .arch-feat-desc { font-size: 13px; color: var(--text-dim); line-height: 1.6; }
+
+    /* ── ENDPOINTS ── */
+    .endpoints-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+    .ep-group { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .ep-group-title {
+      padding: 1rem 1.25rem;
+      background: var(--bg3);
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      border-bottom: 1px solid var(--border);
+    }
+    .ep-list { padding: .5rem; }
+    .ep-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: .6rem 1rem;
+      border-radius: 6px;
+      transition: background .15s;
+      cursor: default;
+    }
+    .ep-item:hover { background: rgba(0,232,122,.04); }
+    .ep-method {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      padding: 2px 7px;
+      border-radius: 4px;
+      min-width: 42px;
+      text-align: center;
+    }
+    .ep-method.GET    { background: rgba(56,189,248,.15); color: var(--blue); }
+    .ep-method.POST   { background: rgba(0,232,122,.15);  color: var(--green); }
+    .ep-method.PUT    { background: rgba(240,165,0,.15);  color: var(--amber); }
+    .ep-method.DELETE { background: rgba(255,77,109,.15); color: var(--red); }
+    .ep-path { font-family: var(--mono); font-size: 12px; color: var(--text); }
+    .ep-lock { font-size: 10px; color: var(--text-dim); margin-left: auto; }
+
+    /* ── CODE SHOWCASE ── */
+    .code-section { background: var(--bg); }
+    .code-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 0; }
+    .code-tab {
+      padding: .75rem 1.5rem;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text-dim);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: color .2s, border-color .2s;
+      letter-spacing: .05em;
+    }
+    .code-tab.active { color: var(--green); border-bottom-color: var(--green); }
+    .code-panel {
+      display: none;
+      background: #080e08;
+      border: 1px solid var(--border);
+      border-radius: 0 0 10px 10px;
+      padding: 1.5rem;
+      font-family: var(--mono);
+      font-size: 12.5px;
+      line-height: 1.8;
+      overflow-x: auto;
+    }
+    .code-panel.active { display: block; }
+    .code-wrap { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-top: 2rem; }
+    .kw { color: var(--red); }
+    .fn { color: var(--blue); }
+    .cls { color: var(--amber); }
+    .str { color: #a3e635; }
+    .cmt { color: var(--text-dim); font-style: italic; }
+    .num { color: #f97316; }
+    .prop { color: var(--green); }
+
+    /* ── STACK ── */
+    .stack-section { background: var(--bg2); border-top: 1px solid var(--border); }
+    .stack-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; }
+    .stack-item {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem 1rem;
+      text-align: center;
+      transition: border-color .2s, transform .2s;
+    }
+    .stack-item:hover { border-color: var(--green-dim); transform: translateY(-4px); }
+    .stack-emoji { font-size: 2rem; margin-bottom: .5rem; }
+    .stack-name { font-family: var(--mono); font-size: 12px; color: #e8f5e8; font-weight: 700; }
+    .stack-ver { font-family: var(--mono); font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+
+    /* ── SECURITY ── */
+    .security-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .sec-item {
+      background: var(--bg2);
+      padding: 2rem;
+      transition: background .2s;
+    }
+    .sec-item:hover { background: var(--bg3); }
+    .sec-icon { font-size: 1.5rem; margin-bottom: 1rem; }
+    .sec-title { font-size: 15px; font-weight: 500; color: #e8f5e8; margin-bottom: .5rem; }
+    .sec-desc { font-size: 13px; color: var(--text-dim); line-height: 1.6; }
+
+    /* ── CTA ── */
+    .cta-section {
+      text-align: center;
+      padding: 7rem 2rem;
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+      position: relative; z-index: 1;
+    }
+    .cta-glow {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(0,232,122,.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .cta-section h2 { margin-bottom: 1rem; }
+    .cta-section p { font-size: 17px; color: var(--text-dim); margin-bottom: 2.5rem; }
+    .cta-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem;
+      text-align: center;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text-dim);
+      position: relative; z-index: 1;
+    }
+    footer a { color: var(--green); text-decoration: none; }
+
+    /* ── DECORATIVE GRID ── */
+    .bg-grid {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(0,232,122,.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,232,122,.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+    }
+
+    /* ── BADGE ── */
+    .badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .05em;
+      border: 1px solid;
+    }
+    .badge-green { border-color: var(--green-dim); color: var(--green); background: rgba(0,232,122,.08); }
+    .badge-blue  { border-color: #1e4a6e;          color: var(--blue);  background: rgba(56,189,248,.08); }
+    .hero-badges { display: flex; gap: 8px; margin-bottom: 2rem; flex-wrap: wrap; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; padding: 7rem 2rem 4rem; gap: 3rem; }
+      .arch-grid { grid-template-columns: 1fr; }
+      .endpoints-grid { grid-template-columns: 1fr; }
+      .security-grid { grid-template-columns: 1fr; }
+      .stats-strip { flex-wrap: wrap; }
+      nav { padding: .75rem 1.25rem; }
+      .nav-links a:not(.nav-cta) { display: none; }
+      .section-inner { padding: 5rem 1.5rem; }
+    }
+
+    /* ── SCROLL ANIMATIONS ── */
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity .7s, transform .7s; }
+    .reveal.in { opacity: 1; transform: none; }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">🍔 <span>restaurant-</span>api-platform</a>
+  <div class="nav-links">
+    <a href="#architecture">Architecture</a>
+    <a href="#endpoints">API</a>
+    <a href="#security">Security</a>
+    <a href="https://github.com/YOUR_USERNAME/restaurant-api-platform" target="_blank">GitHub</a>
+    <a class="nav-cta" href="https://YOUR_URL.up.railway.app/api/v1/auth/login" target="_blank">Live API ↗</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section style="position:relative; overflow:hidden;">
+  <div class="bg-grid"></div>
+  <div class="hero">
+    <div class="hero-left reveal">
+      <div class="hero-eyebrow">Senior PHP Project</div>
+      <h1>Multi-tenant<br/><em>Restaurant</em><br/>API Platform</h1>
+      <div class="hero-badges">
+        <span class="badge badge-green">PHP 8.2</span>
+        <span class="badge badge-green">CodeIgniter 4</span>
+        <span class="badge badge-blue">JWT Auth</span>
+        <span class="badge badge-blue">Redis</span>
+        <span class="badge badge-green">Docker</span>
+      </div>
+      <p class="hero-desc">
+        Production-grade REST API built with a strict layered architecture —
+        Repository pattern, Service layer, RBAC, token rotation, multi-tenant isolation,
+        and a full PHPUnit suite. Zero business logic in controllers.
+      </p>
+      <div class="hero-actions">
+        <a class="btn-primary" href="https://github.com/YOUR_USERNAME/restaurant-api-platform" target="_blank">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+          View on GitHub
+        </a>
+        <a class="btn-secondary" href="https://YOUR_URL.up.railway.app" target="_blank">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          Live Demo
+        </a>
+      </div>
+    </div>
+
+    <div class="terminal-wrap reveal" style="transition-delay:.2s">
+      <div class="terminal">
+        <div class="terminal-bar">
+          <div class="dot dot-r"></div>
+          <div class="dot dot-y"></div>
+          <div class="dot dot-g"></div>
+          <span class="terminal-title">restaurant-api — curl</span>
+        </div>
+        <div class="terminal-body" id="terminal"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-strip">
+  <div class="stat"><div class="stat-num">4</div><div class="stat-label">User Roles</div></div>
+  <div class="stat"><div class="stat-num">22+</div><div class="stat-label">Endpoints</div></div>
+  <div class="stat"><div class="stat-num">6</div><div class="stat-label">State Transitions</div></div>
+  <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Tenant Isolated</div></div>
+  <div class="stat"><div class="stat-num">JWT</div><div class="stat-label">+ Rotation</div></div>
+</div>
+
+<!-- ARCHITECTURE -->
+<section class="arch-section" id="architecture">
+  <div class="section-inner">
+    <div class="arch-grid">
+      <div class="reveal">
+        <div class="section-label">Design Patterns</div>
+        <h2>Clean Layered Architecture</h2>
+        <p class="section-desc">Every layer has a single responsibility. Controllers never touch the database. Services never know about HTTP. Repositories never know about business rules.</p>
+        <div class="arch-features">
+          <div class="arch-feat">
+            <div class="arch-feat-icon">🏗️</div>
+            <div>
+              <div class="arch-feat-title">Repository Pattern</div>
+              <div class="arch-feat-desc">All DB queries behind interfaces — services work against contracts, enabling full unit testing without a real database.</div>
+            </div>
+          </div>
+          <div class="arch-feat">
+            <div class="arch-feat-icon">⚙️</div>
+            <div>
+              <div class="arch-feat-title">Service Layer</div>
+              <div class="arch-feat-desc">Business logic, state machine transitions, tenant checks and total calculations live here — never in controllers.</div>
+            </div>
+          </div>
+          <div class="arch-feat">
+            <div class="arch-feat-icon">📡</div>
+            <div>
+              <div class="arch-feat-title">Domain Events</div>
+              <div class="arch-feat-desc">OrderStatusChanged event decouples order mutations from notifications — listeners handle kitchen alerts and post-delivery flows.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="reveal" style="transition-delay:.15s">
+        <div class="arch-diagram">
+          <div class="arch-layer">
+            <span class="arch-icon">🌐</span>
+            <span class="arch-name">HTTP Request</span>
+            <span class="arch-tech">REST · JSON</span>
+          </div>
+          <div class="arch-arrow">↓</div>
+          <div class="arch-layer">
+            <span class="arch-icon">🔒</span>
+            <span class="arch-name">Filters</span>
+            <span class="arch-tech">JWT · RBAC · RateLimit</span>
+          </div>
+          <div class="arch-arrow">↓</div>
+          <div class="arch-layer">
+            <span class="arch-icon">🎮</span>
+            <span class="arch-name">Controller</span>
+            <span class="arch-tech">Validation · Response</span>
+          </div>
+          <div class="arch-arrow">↓</div>
+          <div class="arch-layer">
+            <span class="arch-icon">⚙️</span>
+            <span class="arch-name">Service</span>
+            <span class="arch-tech">Business Rules · Events</span>
+          </div>
+          <div class="arch-arrow">↓</div>
+          <div class="arch-layer">
+            <span class="arch-icon">🗄️</span>
+            <span class="arch-name">Repository</span>
+            <span class="arch-tech">Query Builder · Transactions</span>
+          </div>
+          <div class="arch-arrow">↓</div>
+          <div class="arch-layer">
+            <span class="arch-icon">💾</span>
+            <span class="arch-name">MySQL + Redis</span>
+            <span class="arch-tech">Persistence · Cache</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ENDPOINTS -->
+<section id="endpoints" style="background: var(--bg); border-top: 1px solid var(--border);">
+  <div class="section-inner">
+    <div class="section-label reveal">API Reference</div>
+    <h2 class="reveal">22+ Versioned Endpoints</h2>
+    <p class="section-desc reveal">All routes under <code style="font-family: var(--mono); background: var(--bg2); padding: 2px 8px; border-radius: 4px;">/api/v1</code>. Fully versioned and ready for v2 without breaking clients.</p>
+    <div class="endpoints-grid">
+      <div class="ep-group reveal">
+        <div class="ep-group-title">🔑 Auth</div>
+        <div class="ep-list">
+          <div class="ep-item"><span class="ep-method POST">POST</span><span class="ep-path">/auth/login</span></div>
+          <div class="ep-item"><span class="ep-method POST">POST</span><span class="ep-path">/auth/refresh</span></div>
+          <div class="ep-item"><span class="ep-method POST">POST</span><span class="ep-path">/auth/logout</span><span class="ep-lock">🔒</span></div>
+          <div class="ep-item"><span class="ep-method GET">GET</span><span class="ep-path">/auth/me</span><span class="ep-lock">🔒</span></div>
+        </div>
+      </div>
+      <div class="ep-group reveal" style="transition-delay:.1s">
+        <div class="ep-group-title">📦 Products</div>
+        <div class="ep-list">
+          <div class="ep-item"><span class="ep-method GET">GET</span><span class="ep-path">/products</span><span class="ep-lock">🔒</span></div>
+          <div class="ep-item"><span class="ep-method GET">GET</span><span class="ep-path">/products/:id</span><span class="ep-lock">🔒</span></div>
+          <div class="ep-item"><span class="ep-method POST">POST</span><span class="ep-path">/products</span><span class="ep-lock">🔒 mgr</span></div>
+          <div class="ep-item"><span class="ep-method PUT">PUT</span><span class="ep-path">/products/:id</span><span class="ep-lock">🔒 mgr</span></div>
+          <div class="ep-item"><span class="ep-method DELETE">DELETE</span><span class="ep-path">/products/:id</span><span class="ep-lock">🔒 mgr</span></div>
+        </div>
+      </div>
+      <div class="ep-group reveal" style="transition-delay:.15s">
+        <div class="ep-group-title">🛒 Orders</div>
+        <div class="ep-list">
+          <div class="ep-item"><span class="ep-method GET">GET</span><span class="ep-path">/orders</span><span class="ep-lock">🔒</span></div>
+          <div class="ep-item"><span class="ep-method GET">GET</span><span class="ep-path">/orders/:id</span><span class="ep-lock">🔒</span></div>
+          <div class="ep-item"><span class="ep-method GET">GET</span><span class="ep-path">/orders/:id/timeline</span><span class="ep-lock">🔒</span></div>
+          <div class="ep-item"><span class="ep-method POST">POST</span><span class="ep-path">/orders</span><span class="ep-lock">🔒</span></div>
+          <div class="ep-item"><span class="ep-method PUT">PUT</span><span class="ep-path">/orders/:id/status</span><span class="ep-lock">🔒</span></div>
+          <div class="ep-item"><span class="ep-method DELETE">DELETE</span><span class="ep-path">/orders/:id</span><span class="ep-lock">🔒</span></div>
+        </div>
+      </div>
+      <div class="ep-group reveal" style="transition-delay:.2s">
+        <div class="ep-group-title">📊 Reports</div>
+        <div class="ep-list">
+          <div class="ep-item"><span class="ep-method GET">GET</span><span class="ep-path">/reports/sales</span><span class="ep-lock">🔒 mgr</span></div>
+          <div class="ep-item"><span class="ep-method GET">GET</span><span class="ep-path">/reports/top-products</span><span class="ep-lock">🔒 mgr</span></div>
+          <div class="ep-item"><span class="ep-method GET">GET</span><span class="ep-path">/reports/orders-by-status</span><span class="ep-lock">🔒 mgr</span></div>
+          <div class="ep-item"><span class="ep-method GET">GET</span><span class="ep-path">/reports/revenue-by-tenant</span><span class="ep-lock">🔒 super</span></div>
+        </div>
+      </div>
+    </div>
+    <!-- State Machine -->
+    <div style="margin-top: 3rem;" class="reveal">
+      <div class="section-label" style="margin-bottom: 1.5rem;">Order State Machine</div>
+      <div style="background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; font-family: var(--mono); font-size: 13px; overflow-x: auto;">
+        <div style="display: flex; align-items: center; gap: 0; flex-wrap: wrap; gap: 8px;">
+          <span style="background: rgba(240,165,0,.15); color: var(--amber); padding: 8px 16px; border-radius: 6px; border: 1px solid rgba(240,165,0,.3);">pending</span>
+          <span style="color: var(--text-dim);">→</span>
+          <span style="background: rgba(56,189,248,.15); color: var(--blue); padding: 8px 16px; border-radius: 6px; border: 1px solid rgba(56,189,248,.3);">confirmed</span>
+          <span style="color: var(--text-dim);">→</span>
+          <span style="background: rgba(240,165,0,.15); color: var(--amber); padding: 8px 16px; border-radius: 6px; border: 1px solid rgba(240,165,0,.3);">preparing</span>
+          <span style="color: var(--text-dim);">→</span>
+          <span style="background: rgba(56,189,248,.15); color: var(--blue); padding: 8px 16px; border-radius: 6px; border: 1px solid rgba(56,189,248,.3);">ready</span>
+          <span style="color: var(--text-dim);">→</span>
+          <span style="background: rgba(0,232,122,.15); color: var(--green); padding: 8px 16px; border-radius: 6px; border: 1px solid rgba(0,232,122,.3);">delivered ✓</span>
+        </div>
+        <div style="margin-top: 12px; color: var(--text-dim); font-size: 12px;">
+          Any cancelable state → <span style="color: var(--red);">cancelled</span> &nbsp;|&nbsp; Invalid transitions return HTTP 422 with a descriptive error
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CODE SHOWCASE -->
+<section class="code-section" style="border-top: 1px solid var(--border);">
+  <div class="section-inner">
+    <div class="section-label reveal">Source Code</div>
+    <h2 class="reveal">Code Written for Humans</h2>
+    <p class="section-desc reveal">Every class has one job. Every method fits on one screen. Every dependency is injected, not instantiated inside. PSR-12 throughout.</p>
+    <div class="reveal" style="transition-delay:.1s">
+      <div class="code-wrap">
+        <div class="code-tabs">
+          <div class="code-tab active" onclick="showTab('service')">OrderService.php</div>
+          <div class="code-tab" onclick="showTab('filter')">JWTAuthFilter.php</div>
+          <div class="code-tab" onclick="showTab('repo')">OrderRepository.php</div>
+        </div>
+        <div class="code-panel active" id="tab-service"><pre><span class="cmt">/**
+ * OrderService — all order business rules live here.
+ * State machine enforces valid transitions only.
+ */</span>
+<span class="kw">class</span> <span class="cls">OrderService</span>
+{
+    <span class="kw">private const</span> <span class="prop">TRANSITIONS</span> = [
+        <span class="str">'pending'</span>   => [<span class="str">'confirmed'</span>, <span class="str">'cancelled'</span>],
+        <span class="str">'confirmed'</span> => [<span class="str">'preparing'</span>, <span class="str">'cancelled'</span>],
+        <span class="str">'preparing'</span> => [<span class="str">'ready'</span>],
+        <span class="str">'ready'</span>     => [<span class="str">'delivered'</span>],
+        <span class="str">'delivered'</span> => [],
+        <span class="str">'cancelled'</span> => [],
+    ];
+
+    <span class="kw">public function</span> <span class="fn">__construct</span>(
+        <span class="kw">private readonly</span> <span class="cls">OrderRepositoryInterface</span>   <span class="prop">$orderRepo</span>,
+        <span class="kw">private readonly</span> <span class="cls">ProductRepositoryInterface</span> <span class="prop">$productRepo</span>,
+    ) {}
+
+    <span class="kw">public function</span> <span class="fn">updateStatus</span>(<span class="kw">int</span> <span class="prop">$id</span>, <span class="kw">string</span> <span class="prop">$newStatus</span>, ...): <span class="kw">array</span>
+    {
+        <span class="prop">$order</span> = <span class="prop">$this</span>-><span class="fn">get</span>(<span class="prop">$id</span>, <span class="prop">$tenantId</span>);        <span class="cmt">// asserts ownership</span>
+        <span class="prop">$this</span>-><span class="fn">assertValidTransition</span>(<span class="prop">$order</span>[<span class="str">'status'</span>], <span class="prop">$newStatus</span>);
+
+        <span class="prop">$this</span>-><span class="prop">orderRepo</span>-><span class="fn">updateStatus</span>(<span class="prop">$id</span>, <span class="prop">$newStatus</span>, <span class="prop">$changedBy</span>);
+
+        <span class="cmt">// Dispatch domain event — listeners handle notifications</span>
+        <span class="cls">Events</span>::<span class="fn">trigger</span>(
+            <span class="cls">OrderStatusChanged</span>::<span class="prop">NAME</span>,
+            <span class="kw">new</span> <span class="cls">OrderStatusChanged</span>(<span class="prop">$id</span>, <span class="prop">$order</span>[<span class="str">'status'</span>], <span class="prop">$newStatus</span>)
+        );
+
+        <span class="kw">return</span> <span class="prop">$this</span>-><span class="prop">orderRepo</span>-><span class="fn">findById</span>(<span class="prop">$id</span>);
+    }
+}</pre></div>
+        <div class="code-panel" id="tab-filter"><pre><span class="cmt">/**
+ * JWTAuthFilter — validates Bearer token on every protected route.
+ * On success, injects the user into the request-scoped auth service.
+ */</span>
+<span class="kw">class</span> <span class="cls">JWTAuthFilter</span> <span class="kw">implements</span> <span class="cls">FilterInterface</span>
+{
+    <span class="kw">public function</span> <span class="fn">before</span>(<span class="cls">RequestInterface</span> <span class="prop">$request</span>, <span class="prop">$arguments</span> = <span class="kw">null</span>)
+    {
+        <span class="prop">$authHeader</span> = <span class="prop">$request</span>-><span class="fn">getHeaderLine</span>(<span class="str">'Authorization'</span>);
+
+        <span class="kw">if</span> (empty(<span class="prop">$authHeader</span>) || !<span class="fn">str_starts_with</span>(<span class="prop">$authHeader</span>, <span class="str">'Bearer '</span>)) {
+            <span class="kw">return</span> <span class="prop">$this</span>-><span class="fn">unauthorized</span>(<span class="str">'Missing or malformed Authorization header.'</span>);
+        }
+
+        <span class="prop">$token</span> = <span class="fn">substr</span>(<span class="prop">$authHeader</span>, <span class="num">7</span>);
+
+        <span class="kw">try</span> {
+            <span class="prop">$payload</span> = (<span class="kw">new</span> <span class="cls">JWTHandler</span>())-><span class="fn">decode</span>(<span class="prop">$token</span>);
+
+            <span class="kw">if</span> ((<span class="prop">$payload</span>->type ?? <span class="str">''</span>) !== <span class="str">'access'</span>) {
+                <span class="kw">return</span> <span class="prop">$this</span>-><span class="fn">unauthorized</span>(<span class="str">'Invalid token type.'</span>);
+            }
+
+            <span class="prop">$user</span> = (<span class="kw">new</span> <span class="cls">UserModel</span>())-><span class="fn">find</span>(<span class="prop">$payload</span>->sub);
+
+            <span class="kw">if</span> (!<span class="prop">$user</span> || !<span class="prop">$user</span>[<span class="str">'is_active'</span>]) {
+                <span class="kw">return</span> <span class="prop">$this</span>-><span class="fn">unauthorized</span>(<span class="str">'User not found or inactive.'</span>);
+            }
+
+            <span class="fn">service</span>(<span class="str">'auth'</span>)-><span class="fn">setUser</span>(<span class="prop">$user</span>); <span class="cmt">// inject into request scope</span>
+
+        } <span class="kw">catch</span> (\<span class="cls">Exception</span> <span class="prop">$e</span>) {
+            <span class="kw">return</span> <span class="prop">$this</span>-><span class="fn">unauthorized</span>(<span class="prop">$e</span>-><span class="fn">getMessage</span>());
+        }
+    }
+}</pre></div>
+        <div class="code-panel" id="tab-repo"><pre><span class="cmt">/**
+ * OrderRepository — all order queries centralised here.
+ * Services never touch the query builder directly.
+ */</span>
+<span class="kw">public function</span> <span class="fn">create</span>(<span class="kw">array</span> <span class="prop">$data</span>): <span class="kw">int</span>
+{
+    <span class="prop">$this</span>-><span class="prop">db</span>-><span class="fn">transStart</span>();  <span class="cmt">// atomic — items + timeline or nothing</span>
+
+    <span class="prop">$this</span>-><span class="prop">db</span>-><span class="fn">table</span>(<span class="str">'orders'</span>)-><span class="fn">insert</span>([
+        <span class="str">'tenant_id'</span> => <span class="prop">$data</span>[<span class="str">'tenant_id'</span>],
+        <span class="str">'status'</span>    => <span class="str">'pending'</span>,
+        <span class="str">'total'</span>     => <span class="prop">$data</span>[<span class="str">'total'</span>],
+    ]);
+    <span class="prop">$orderId</span> = <span class="prop">$this</span>-><span class="prop">db</span>-><span class="fn">insertID</span>();
+
+    <span class="kw">foreach</span> (<span class="prop">$data</span>[<span class="str">'items'</span>] <span class="kw">as</span> <span class="prop">$item</span>) {
+        <span class="prop">$this</span>-><span class="prop">db</span>-><span class="fn">table</span>(<span class="str">'order_items'</span>)-><span class="fn">insert</span>([...<span class="prop">$item</span>, <span class="str">'order_id'</span> => <span class="prop">$orderId</span>]);
+    }
+
+    <span class="prop">$this</span>-><span class="fn">recordTimeline</span>(<span class="prop">$orderId</span>, <span class="str">'pending'</span>, <span class="prop">$data</span>[<span class="str">'user_id'</span>]);
+    <span class="prop">$this</span>-><span class="prop">db</span>-><span class="fn">transComplete</span>();
+
+    <span class="kw">if</span> (!<span class="prop">$this</span>-><span class="prop">db</span>-><span class="fn">transStatus</span>()) {
+        <span class="kw">throw new</span> \<span class="cls">RuntimeException</span>(<span class="str">'Transaction rolled back.'</span>);
+    }
+
+    <span class="kw">return</span> <span class="prop">$orderId</span>;
+}</pre></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECURITY -->
+<section id="security" style="background: var(--bg2); border-top: 1px solid var(--border);">
+  <div class="section-inner">
+    <div class="section-label reveal">Security</div>
+    <h2 class="reveal">Defence in Depth</h2>
+    <p class="section-desc reveal">Six independent security layers. An attacker has to bypass all of them.</p>
+    <div class="security-grid reveal" style="transition-delay:.1s">
+      <div class="sec-item"><div class="sec-icon">🔑</div><div class="sec-title">JWT with Token Rotation</div><div class="sec-desc">Access tokens expire in 15 min. Refresh tokens rotate on every use — stolen tokens are invalidated immediately via Redis JTI revocation lists.</div></div>
+      <div class="sec-item"><div class="sec-icon">👤</div><div class="sec-title">Role-Based Access Control</div><div class="sec-desc">4 roles: superadmin · manager · cashier · kitchen. Every route declares its required role. Violations return 403 — never 404 (no information leakage).</div></div>
+      <div class="sec-item"><div class="sec-icon">🏢</div><div class="sec-title">Multi-Tenant Isolation</div><div class="sec-desc">Users are locked to their tenant_id at the filter layer AND the service layer. Cross-tenant reads are impossible — even with a valid JWT.</div></div>
+      <div class="sec-item"><div class="sec-icon">🚦</div><div class="sec-title">Rate Limiting</div><div class="sec-desc">Sliding-window counter backed by Redis. 60 req/min per IP. Atomic increments prevent race conditions across concurrent PHP workers.</div></div>
+      <div class="sec-item"><div class="sec-icon">🛡️</div><div class="sec-title">Input Validation</div><div class="sec-desc">CI4 validation rules on every mutating endpoint. Strict allow-lists for JSON fields. SQL injection impossible via parameterised query builder.</div></div>
+      <div class="sec-item"><div class="sec-icon">🔐</div><div class="sec-title">Password Hashing</div><div class="sec-desc">Bcrypt via PHP's password_hash(). Auto-hashed in UserModel beforeInsert/beforeUpdate hooks. Plain passwords never hit the database.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- TECH STACK -->
+<section class="stack-section">
+  <div class="section-inner">
+    <div class="section-label reveal">Technology Stack</div>
+    <h2 class="reveal">Built on Proven Tools</h2>
+    <div class="stack-grid reveal" style="transition-delay:.1s; margin-top: 2.5rem;">
+      <div class="stack-item"><div class="stack-emoji">🐘</div><div class="stack-name">PHP</div><div class="stack-ver">8.2</div></div>
+      <div class="stack-item"><div class="stack-emoji">🔥</div><div class="stack-name">CodeIgniter</div><div class="stack-ver">4.4</div></div>
+      <div class="stack-item"><div class="stack-emoji">🐬</div><div class="stack-name">MySQL</div><div class="stack-ver">8.0</div></div>
+      <div class="stack-item"><div class="stack-emoji">⚡</div><div class="stack-name">Redis</div><div class="stack-ver">7.0</div></div>
+      <div class="stack-item"><div class="stack-emoji">🐳</div><div class="stack-name">Docker</div><div class="stack-ver">Compose</div></div>
+      <div class="stack-item"><div class="stack-emoji">🧪</div><div class="stack-name">PHPUnit</div><div class="stack-ver">10.0</div></div>
+      <div class="stack-item"><div class="stack-emoji">🔑</div><div class="stack-name">JWT</div><div class="stack-ver">firebase/php-jwt</div></div>
+      <div class="stack-item"><div class="stack-emoji">🚂</div><div class="stack-name">Railway</div><div class="stack-ver">Deploy</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-glow"></div>
+  <div class="section-label reveal">Ready to explore</div>
+  <h2 class="reveal">See the Code.<br/>Test the API.</h2>
+  <p class="reveal" style="transition-delay:.1s;">Clone the repo, spin up Docker, and have a running API in under 5 minutes.</p>
+  <div class="cta-actions reveal" style="transition-delay:.15s;">
+    <a class="btn-primary" href="https://github.com/YOUR_USERNAME/restaurant-api-platform" target="_blank">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      View Source on GitHub
+    </a>
+    <a class="btn-secondary" href="https://YOUR_URL.up.railway.app/api/v1/auth/login" target="_blank">
+      POST /auth/login ↗
+    </a>
+  </div>
+</section>
+
+<footer>
+  <p>Built with PHP 8.2 · CodeIgniter 4 · Redis · MySQL · Docker &nbsp;·&nbsp; <a href="https://github.com/YOUR_USERNAME/restaurant-api-platform" target="_blank">github.com/YOUR_USERNAME/restaurant-api-platform</a></p>
+</footer>
+
+<script>
+  /* ── TERMINAL ANIMATION ── */
+  const lines = [
+    { delay: 0,    type: 'prompt', content: '# Login as manager' },
+    { delay: 300,  type: 'cmd',    content: 'curl -X POST /api/v1/auth/login \\' },
+    { delay: 450,  type: 'cmd',    content: '  -d \'{"email":"manager@burgerhouse.com"}\'' },
+    { delay: 700,  type: 'blank' },
+    { delay: 1000, type: 'resp',   content: '{ <k>"status"</k>: <s>"success"</s>,' },
+    { delay: 1100, type: 'resp',   content: '  <k>"data"</k>: {' },
+    { delay: 1200, type: 'resp',   content: '    <k>"access_token"</k>: <s>"eyJ..."</s>,' },
+    { delay: 1300, type: 'resp',   content: '    <k>"expires_in"</k>: <n>900</n>,' },
+    { delay: 1400, type: 'resp',   content: '    <k>"user"</k>: { <k>"role"</k>: <s>"manager"</s> }' },
+    { delay: 1550, type: 'resp',   content: '}' },
+    { delay: 1800, type: 'blank' },
+    { delay: 2100, type: 'prompt', content: '# Create an order' },
+    { delay: 2300, type: 'cmd',    content: 'curl -X POST /api/v1/orders \\' },
+    { delay: 2450, type: 'cmd',    content: '  -H "Authorization: Bearer eyJ..." \\' },
+    { delay: 2600, type: 'cmd',    content: '  -d \'{"items":[{"product_id":1,"quantity":2}]}\'' },
+    { delay: 2900, type: 'blank' },
+    { delay: 3100, type: 'ok',     content: '✓ 201 Created — Order #42 placed' },
+    { delay: 3400, type: 'blank' },
+    { delay: 3700, type: 'prompt', content: '# Transition state: confirmed → preparing' },
+    { delay: 3900, type: 'cmd',    content: 'curl -X PUT /api/v1/orders/42/status \\' },
+    { delay: 4050, type: 'cmd',    content: '  -d \'{"status":"preparing"}\'' },
+    { delay: 4300, type: 'ok',     content: '✓ 200 OK — Status updated, kitchen notified' },
+    { delay: 4600, type: 'cursor' },
+  ];
+
+  const terminal = document.getElementById('terminal');
+
+  lines.forEach(line => {
+    setTimeout(() => {
+      if (line.type === 'cursor') {
+        const span = document.createElement('span');
+        span.innerHTML = '<span class="cursor"></span>';
+        terminal.appendChild(span);
+        return;
+      }
+      const div = document.createElement('div');
+      div.className = 't-line';
+      if (line.type === 'blank') { div.className += ' t-blank'; div.style.opacity = 1; }
+      else if (line.type === 'prompt') div.innerHTML = `<span class="t-prompt">$</span><span class="t-comment">${line.content}</span>`;
+      else if (line.type === 'cmd')    div.innerHTML = `<span class="t-prompt"> </span><span class="t-cmd">${line.content}</span>`;
+      else if (line.type === 'ok')     div.innerHTML = `<span class="t-ok">${line.content}</span>`;
+      else if (line.type === 'resp') {
+        const html = line.content
+          .replace(/<k>/g, '<span class="t-key">').replace(/<\/k>/g, '</span>')
+          .replace(/<s>/g, '<span class="t-str">').replace(/<\/s>/g, '</span>')
+          .replace(/<n>/g, '<span class="t-num">').replace(/<\/n>/g, '</span>');
+        div.innerHTML = `<span class="t-prompt"> </span><span class="t-json">${html}</span>`;
+      }
+      div.style.animationDelay = '0s';
+      terminal.appendChild(div);
+      terminal.scrollTop = terminal.scrollHeight;
+    }, line.delay);
+  });
+
+  /* ── CODE TABS ── */
+  function showTab(id) {
+    document.querySelectorAll('.code-tab').forEach((t,i) => {
+      t.classList.toggle('active', t.textContent.toLowerCase().includes(id));
+    });
+    document.querySelectorAll('.code-panel').forEach(p => {
+      p.classList.toggle('active', p.id === 'tab-' + id);
+    });
+  }
+
+  /* ── SCROLL REVEAL ── */
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); observer.unobserve(e.target); } });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
