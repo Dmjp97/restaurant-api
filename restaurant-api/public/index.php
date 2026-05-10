@@ -1,7 +1,7 @@
 <?php
 
 /**
- * CodeIgniter front controller.
+ * CodeIgniter front controller - v2
  */
 
 define('FCPATH', __DIR__ . DIRECTORY_SEPARATOR);
