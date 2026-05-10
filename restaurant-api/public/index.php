@@ -45,6 +45,10 @@ if (! defined('ENVIRONMENT')) {
 	define('ENVIRONMENT', $ciEnv);
 }
 
+if (! defined('CodeIgniter\\ENVIRONMENT')) {
+	define('CodeIgniter\\ENVIRONMENT', $ciEnv);
+}
+
 if (getcwd() . DIRECTORY_SEPARATOR !== FCPATH) {
 	chdir(FCPATH);
 }
