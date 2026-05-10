@@ -37,6 +37,8 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Start Apache through a wrapper that normalizes the loaded MPM modules first
 COPY docker/start-apache.sh /usr/local/bin/start-apache.sh
 RUN chmod +x /usr/local/bin/start-apache.sh
+COPY docker/apache/vhost.conf /etc/apache2/sites-available/000-default.conf
+RUN a2ensite 000-default.conf || true
 
 WORKDIR /var/www/html
 
