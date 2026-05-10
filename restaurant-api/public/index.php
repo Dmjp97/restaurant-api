@@ -41,6 +41,10 @@ putenv("CI_ENVIRONMENT={$ciEnv}");
 $_ENV['CI_ENVIRONMENT'] = $ciEnv;
 $_SERVER['CI_ENVIRONMENT'] = $ciEnv;
 
+if (! defined('ENVIRONMENT')) {
+	define('ENVIRONMENT', $ciEnv);
+}
+
 if (getcwd() . DIRECTORY_SEPARATOR !== FCPATH) {
 	chdir(FCPATH);
 }
