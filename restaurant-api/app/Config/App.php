@@ -6,22 +6,17 @@ use CodeIgniter\Config\BaseConfig;
 
 class App extends BaseConfig
 {
-    public string $baseURL = '';
+    public string $baseURL = 'http://localhost:8080/';
     public array $allowedHostnames = [];
-    public string $indexPage = '';
+    public string $indexPage = 'index.php';
     public string $uriProtocol = 'REQUEST_URI';
-    public bool $allowQueryStringUriSegments = false;
+    public string $permittedURIChars = 'a-z 0-9~%.:_\-';
     public string $defaultLocale = 'en';
     public bool $negotiateLocale = false;
     public array $supportedLocales = ['en'];
     public string $appTimezone = 'UTC';
     public string $charset = 'UTF-8';
     public bool $forceGlobalSecureRequests = false;
-    public string $cookiePrefix = '';
-    public int $cookieExpires = 0;
-    public string $cookieDomain = '';
-    public string $cookiePath = '/';
-    public bool $cookieSecure = false;
-    public bool $cookieHTTPOnly = true;
-    public string $cookieSameSite = 'Lax';
+    public array $proxyIPs = [];
+    public bool $CSPEnabled = false;
 }
