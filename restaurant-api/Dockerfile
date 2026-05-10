@@ -26,9 +26,10 @@ RUN apt-get update && apt-get install -y \
 RUN pecl install redis && docker-php-ext-enable redis
 
 # Ensure only one MPM is loaded and enable mod_rewrite
-RUN rm -f /etc/apache2/mods-enabled/mpm_worker.load /etc/apache2/mods-enabled/mpm_event.load /etc/apache2/mods-enabled/mpm_worker.conf /etc/apache2/mods-enabled/mpm_event.conf 2>/dev/null || true \
-    && a2dismod mpm_worker mpm_event 2>/dev/null || true \
-    && a2enmod mpm_prefork rewrite
+RUN set -eux; \
+    find /etc/apache2/mods-enabled -maxdepth 1 -type l -name 'mpm_*.load' ! -name 'mpm_prefork.load' -delete; \
+    find /etc/apache2/mods-enabled -maxdepth 1 -type l -name 'mpm_*.conf' ! -name 'mpm_prefork.conf' -delete; \
+    a2enmod mpm_prefork rewrite
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
