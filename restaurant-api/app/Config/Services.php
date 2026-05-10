@@ -4,6 +4,8 @@ namespace Config;
 
 use App\Libraries\AuthUser;
 use CodeIgniter\Config\Services as CoreServices;
+use CodeIgniter\HTTP\IncomingRequest;
+use CodeIgniter\HTTP\UserAgent;
 
 /**
  * Services
@@ -24,5 +26,21 @@ class Services extends CoreServices
         }
 
         return new AuthUser();
+    }
+
+    public static function incomingrequest(?App $config = null, bool $getShared = true): IncomingRequest
+    {
+        if ($getShared) {
+            return static::getSharedInstance('request', $config);
+        }
+
+        $config ??= config(App::class);
+
+        return new IncomingRequest(
+            $config,
+            static::get('uri'),
+            'php://input',
+            new UserAgent(new UserAgents())
+        );
     }
 }
