@@ -25,6 +25,36 @@ if (version_compare(PHP_VERSION, $minPhpVersion, '<')) {
 
 define('FCPATH', __DIR__ . DIRECTORY_SEPARATOR);
 
+if (isset($_GET['diag'])) {
+	header('Content-Type: application/json');
+	$loggerFile = FCPATH . '../app/Config/Logger.php';
+	$userAgentsFile = FCPATH . '../app/Config/UserAgents.php';
+	$exceptionsFile = FCPATH . '../app/Config/Exceptions.php';
+	$autoloadFile = FCPATH . '../app/Config/Autoload.php';
+
+	if (is_file($loggerFile)) {
+		require_once $loggerFile;
+	}
+	if (is_file($userAgentsFile)) {
+		require_once $userAgentsFile;
+	}
+	if (is_file($exceptionsFile)) {
+		require_once $exceptionsFile;
+	}
+
+	echo json_encode([
+		'logger_file' => is_file($loggerFile),
+		'useragents_file' => is_file($userAgentsFile),
+		'exceptions_file' => is_file($exceptionsFile),
+		'autoload_file' => is_file($autoloadFile),
+		'logger_class' => class_exists('Config\\Logger'),
+		'useragents_class' => class_exists('Config\\UserAgents'),
+		'exceptions_class' => class_exists('Config\\Exceptions'),
+	], JSON_PRETTY_PRINT);
+
+	exit;
+}
+
 if (! defined('COMPOSER_PATH')) {
 	define('COMPOSER_PATH', FCPATH . '../vendor/autoload.php');
 }
