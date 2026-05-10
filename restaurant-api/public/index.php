@@ -1,12 +1,12 @@
 <?php
 
 /**
- * CodeIgniter front controller - v2
+ * CodeIgniter front controller.
  */
 
 define('FCPATH', __DIR__ . DIRECTORY_SEPARATOR);
 
-require FCPATH . '../vendor/autoload.php';
+require FCPATH . '../app/Config/Paths.php';
 
 $paths = new \Config\Paths();
 
