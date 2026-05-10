@@ -4,8 +4,10 @@ namespace Config;
 
 use App\Libraries\AuthUser;
 use CodeIgniter\Config\Services as CoreServices;
+use CodeIgniter\Debug\Exceptions as FrameworkExceptions;
 use CodeIgniter\HTTP\IncomingRequest;
 use CodeIgniter\HTTP\UserAgent;
+use CodeIgniter\Log\Logger as FrameworkLogger;
 
 /**
  * Services
@@ -42,5 +44,23 @@ class Services extends CoreServices
             'php://input',
             new UserAgent(new UserAgents())
         );
+    }
+
+    public static function exceptions(?Exceptions $config = null, bool $getShared = true): FrameworkExceptions
+    {
+        if ($getShared) {
+            return static::getSharedInstance('exceptions', $config);
+        }
+
+        return new FrameworkExceptions($config ?? new Exceptions());
+    }
+
+    public static function logger(bool $getShared = true): FrameworkLogger
+    {
+        if ($getShared) {
+            return static::getSharedInstance('logger');
+        }
+
+        return new FrameworkLogger(new Logger());
     }
 }
