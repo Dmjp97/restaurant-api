@@ -29,6 +29,10 @@ if (! defined('COMPOSER_PATH')) {
 	define('COMPOSER_PATH', FCPATH . '../vendor/autoload.php');
 }
 
+if (! defined('CodeIgniter\\COMPOSER_PATH')) {
+	define('CodeIgniter\\COMPOSER_PATH', COMPOSER_PATH);
+}
+
 if (getcwd() . DIRECTORY_SEPARATOR !== FCPATH) {
 	chdir(FCPATH);
 }
