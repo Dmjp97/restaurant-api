@@ -37,6 +37,6 @@ COPY . .
 
 RUN composer install --no-dev --optimize-autoloader
 
-RUN chown -R www-data:www-data /var/www/html/writable
+RUN mkdir -p /var/www/html/writable && chown -R www-data:www-data /var/www/html/writable
 
 EXPOSE 80
