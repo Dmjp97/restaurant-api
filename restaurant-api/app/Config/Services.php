@@ -3,7 +3,7 @@
 namespace Config;
 
 use App\Libraries\AuthUser;
-use CodeIgniter\Config\BaseService;
+use CodeIgniter\Config\Services as CoreServices;
 
 /**
  * Services
@@ -11,7 +11,7 @@ use CodeIgniter\Config\BaseService;
  * Registers custom application services into CI4's service locator.
  * Access them with: service('auth')
  */
-class Services extends BaseService
+class Services extends CoreServices
 {
     /**
      * Returns the AuthUser singleton for the current request.
