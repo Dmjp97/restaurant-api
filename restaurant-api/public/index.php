@@ -6,8 +6,8 @@
 
 define('FCPATH', __DIR__ . DIRECTORY_SEPARATOR);
 
-require FCPATH . '../app/Config/Paths.php';
+require FCPATH . '../vendor/autoload.php';
 
-$paths = new Config\Paths();
+$paths = new \Config\Paths();
 
 require $paths->systemDirectory . '/bootstrap.php';

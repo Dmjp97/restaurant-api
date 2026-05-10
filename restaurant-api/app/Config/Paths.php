@@ -10,6 +10,6 @@ class Paths extends BaseConfig
     public string $appDirectory = __DIR__ . '/..';
     public string $writableDirectory = __DIR__ . '/../../writable';
     public string $testsDirectory = __DIR__ . '/../../tests';
-    public string $viewDirectory = __DIR__ . '/../../app/Views';
+    public string $viewDirectory = __DIR__ . '/../Views';
     public string $publicDirectory = __DIR__ . '/../../public';
 }
