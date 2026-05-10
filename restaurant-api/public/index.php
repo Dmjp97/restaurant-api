@@ -25,6 +25,10 @@ if (version_compare(PHP_VERSION, $minPhpVersion, '<')) {
 
 define('FCPATH', __DIR__ . DIRECTORY_SEPARATOR);
 
+if (! defined('COMPOSER_PATH')) {
+	define('COMPOSER_PATH', FCPATH . '../vendor/autoload.php');
+}
+
 if (getcwd() . DIRECTORY_SEPARATOR !== FCPATH) {
 	chdir(FCPATH);
 }
