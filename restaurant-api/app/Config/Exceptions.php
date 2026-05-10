@@ -10,7 +10,7 @@ use Throwable;
 
 class Exceptions extends BaseConfig
 {
-    public bool $log = true;
+    public bool $log = false;
 
     public array $ignoreCodes = [404];
 
