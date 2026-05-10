@@ -1,13 +1,17 @@
 <?php
 
 /**
- * CodeIgniter front controller.
+ * CodeIgniter 4.5+ front controller
  */
 
 define('FCPATH', __DIR__ . DIRECTORY_SEPARATOR);
 
-require FCPATH . '../app/Config/Paths.php';
+// Require Composer autoload
+require_once FCPATH . '../vendor/autoload.php';
 
-$paths = new \Config\Paths();
+// Setup configuration - create app from BaseConfig
+$config = new \Config\App();
 
-require $paths->systemDirectory . '/bootstrap.php';
+// Create and run the application
+$app = new \CodeIgniter\App($config);
+$app->run();
