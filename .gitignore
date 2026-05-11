@@ -1,0 +1,39 @@
+# Environment
+.env
+*.env
+
+# Dependencies
+/vendor/
+
+# Accidental/generated folders
+/[{]app/
+/writable/[{]cache,logs,session,uploads,debugbar[}]/
+
+# CI4 writable directories (auto-created by Docker)
+/writable/cache/*
+/writable/logs/*
+/writable/session/*
+/writable/uploads/*
+/writable/debugbar/*
+
+# Keep the directories themselves
+!writable/cache/.gitkeep
+!writable/logs/.gitkeep
+!writable/session/.gitkeep
+!writable/uploads/.gitkeep
+!writable/debugbar/.gitkeep
+
+# Test coverage
+/coverage/
+
+# Composer local
+composer.phar
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp

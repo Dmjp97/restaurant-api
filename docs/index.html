@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Restaurant API Platform — PHP 8 · CodeIgniter 4</title>
+  <meta name="description" content="Production-grade multi-tenant REST API. PHP 8.2 · CodeIgniter 4 · JWT · RBAC · Redis · Docker."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--g:#00e87a;--gd:#00994f;--am:#f0a500;--re:#ff4d6d;--bl:#38bdf8;--bg:#060a06;--bg2:#0c130c;--bg3:#111911;--bd:#1e2e1e;--tx:#c8dac8;--txd:#6b8a6b;--mono:'JetBrains Mono',monospace;--serif:'Playfair Display',serif;--sans:'DM Sans',sans-serif}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--tx);font-family:var(--sans);font-size:16px;line-height:1.6;overflow-x:hidden}
+    nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:.9rem 2rem;background:rgba(6,10,6,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--bd)}
+    .nav-logo{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--g);text-decoration:none;letter-spacing:.08em}
+    .nav-logo span{color:var(--txd)}
+    .nav-links{display:flex;gap:1.5rem;align-items:center}
+    .nav-links a{font-family:var(--mono);font-size:12px;color:var(--txd);text-decoration:none;letter-spacing:.05em;transition:color .2s}
+    .nav-links a:hover{color:var(--g)}
+    .nav-cta{color:var(--bg)!important;background:var(--g);padding:6px 16px;border-radius:4px;font-weight:700!important}
+    /* HERO */
+    .hero{min-height:100vh;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;padding:8rem 6rem 5rem;position:relative;z-index:1;background-image:linear-gradient(rgba(0,232,122,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,232,122,.025) 1px,transparent 1px);background-size:60px 60px}
+    .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--g);text-transform:uppercase;margin-bottom:1.5rem;display:flex;align-items:center;gap:8px}
+    .eyebrow::before{content:'';display:inline-block;width:32px;height:1px;background:var(--g)}
+    h1{font-family:var(--serif);font-size:clamp(2.4rem,4vw,3.8rem);font-weight:900;line-height:1.1;color:#e8f5e8;margin-bottom:1.5rem}
+    h1 em{font-style:normal;color:var(--g)}
+    .hero-desc{font-size:17px;color:var(--txd);max-width:480px;margin-bottom:2rem;line-height:1.8}
+    .badges{display:flex;gap:8px;margin-bottom:2rem;flex-wrap:wrap}
+    .badge{display:inline-flex;align-items:center;padding:4px 10px;border-radius:4px;font-family:var(--mono);font-size:11px;letter-spacing:.04em;border:1px solid}
+    .bg{border-color:var(--gd);color:var(--g);background:rgba(0,232,122,.08)}
+    .bb{border-color:#1e4a6e;color:var(--bl);background:rgba(56,189,248,.08)}
+    .hero-btns{display:flex;gap:1rem;flex-wrap:wrap}
+    .btn-p{display:inline-flex;align-items:center;gap:8px;padding:13px 26px;background:var(--g);color:var(--bg);font-family:var(--mono);font-size:13px;font-weight:700;border-radius:6px;text-decoration:none;letter-spacing:.05em;transition:transform .15s,box-shadow .15s;box-shadow:0 0 32px rgba(0,232,122,.15)}
+    .btn-p:hover{transform:translateY(-2px);box-shadow:0 0 48px rgba(0,232,122,.3)}
+    .btn-s{display:inline-flex;align-items:center;gap:8px;padding:13px 26px;background:transparent;color:var(--tx);font-family:var(--mono);font-size:13px;border:1px solid var(--bd);border-radius:6px;text-decoration:none;letter-spacing:.05em;transition:border-color .2s,color .2s}
+    .btn-s:hover{border-color:var(--g);color:var(--g)}
+    /* TERMINAL */
+    .terminal{background:#080e08;border:1px solid #1a2e1a;border-radius:12px;overflow:hidden;box-shadow:0 40px 80px rgba(0,0,0,.8)}
+    .tbar{background:#0d160d;padding:12px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #1a2e1a}
+    .dot{width:12px;height:12px;border-radius:50%}
+    .dr{background:#ff5f56}.dy{background:#ffbd2e}.dg{background:#27c93f}
+    .ttitle{font-family:var(--mono);font-size:12px;color:var(--txd);margin:0 auto}
+    .tbody{padding:1.5rem;font-family:var(--mono);font-size:12.5px;line-height:1.8;min-height:320px}
+    .tl{display:flex;gap:8px;opacity:0;animation:fi .05s forwards}.tb{height:.5rem}
+    .tp{color:var(--gd);flex-shrink:0}.tc{color:#e8f5e8}.tcm{color:var(--txd)}.tok{color:var(--g);font-weight:700}
+    .tk{color:var(--bl)}.ts{color:var(--am)}.tn{color:#f97316}
+    .cursor{display:inline-block;width:8px;height:14px;background:var(--g);animation:blink 1s step-end infinite;vertical-align:text-bottom;margin-left:2px}
+    @keyframes blink{50%{opacity:0}}@keyframes fi{to{opacity:1}}
+    /* STATS */
+    .stats{display:flex;justify-content:center;border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);background:var(--bg2);position:relative;z-index:1}
+    .stat{flex:1;max-width:200px;padding:2rem 1.5rem;text-align:center;border-right:1px solid var(--bd)}
+    .stat:last-child{border-right:none}
+    .stat-n{font-family:var(--serif);font-size:2.5rem;font-weight:900;color:var(--g);line-height:1;margin-bottom:.25rem}
+    .stat-l{font-family:var(--mono);font-size:11px;color:var(--txd);letter-spacing:.1em;text-transform:uppercase}
+    /* SECTIONS */
+    section{position:relative;z-index:1}
+    .si{max-width:1200px;margin:0 auto;padding:6rem 3rem}
+    .sl{font-family:var(--mono);font-size:11px;letter-spacing:.25em;color:var(--gd);text-transform:uppercase;margin-bottom:1rem}
+    h2{font-family:var(--serif);font-size:clamp(1.8rem,3vw,2.6rem);font-weight:900;color:#e8f5e8;margin-bottom:1rem;line-height:1.2}
+    .sd{font-size:17px;color:var(--txd);max-width:560px;line-height:1.8;margin-bottom:3rem}
+    /* EXPLORER */
+    .explorer{background:var(--bg2);border-top:1px solid var(--bd)}
+    .exp-wrap{display:grid;grid-template-columns:260px 1fr;gap:0;border:1px solid var(--bd);border-radius:12px;overflow:hidden}
+    .exp-sidebar{background:var(--bg3);border-right:1px solid var(--bd);padding:.75rem 0}
+    .exp-gt{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--txd);padding:.5rem 1.25rem;margin-top:.5rem}
+    .exp-ep{display:flex;align-items:center;gap:8px;padding:.5rem 1.25rem;cursor:pointer;transition:background .15s;border-left:2px solid transparent}
+    .exp-ep:hover{background:rgba(0,232,122,.04)}
+    .exp-ep.active{background:rgba(0,232,122,.07);border-left-color:var(--g)}
+    .m{font-family:var(--mono);font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px;min-width:34px;text-align:center}
+    .ep-p{font-family:var(--mono);font-size:11px;color:var(--tx)}
+    .m.GET{background:rgba(56,189,248,.15);color:var(--bl)}
+    .m.POST{background:rgba(0,232,122,.15);color:var(--g)}
+    .m.PUT{background:rgba(240,165,0,.15);color:var(--am)}
+    .exp-main{display:flex;flex-direction:column}
+    .exp-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--bd);display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}
+    .exp-title{font-family:var(--mono);font-size:13px;color:#e8f5e8;font-weight:700}
+    .exp-desc{font-size:12px;color:var(--txd);margin-top:4px;max-width:420px}
+    .run-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 20px;background:var(--g);color:var(--bg);font-family:var(--mono);font-size:12px;font-weight:700;border:none;border-radius:6px;cursor:pointer;white-space:nowrap;transition:opacity .2s}
+    .run-btn:hover{opacity:.85}
+    .run-btn.loading{opacity:.6;pointer-events:none}
+    .exp-body{display:grid;grid-template-columns:1fr 1fr}
+    .exp-pane{padding:1.25rem 1.5rem;border-right:1px solid var(--bd)}
+    .exp-pane:last-child{border-right:none}
+    .pane-title{font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--txd);margin-bottom:.75rem;display:flex;align-items:center;gap:8px}
+    .sb{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700}
+    .s200{background:rgba(0,232,122,.15);color:var(--g)}.s201{background:rgba(56,189,248,.15);color:var(--bl)}.s401{background:rgba(255,77,109,.15);color:var(--re)}.s422{background:rgba(240,165,0,.15);color:var(--am)}
+    textarea{width:100%;background:var(--bg);border:1px solid var(--bd);border-radius:6px;padding:10px;font-family:var(--mono);font-size:11.5px;color:var(--tx);resize:vertical;min-height:180px;outline:none;transition:border-color .2s;line-height:1.7}
+    textarea:focus{border-color:var(--gd)}
+    .res-box{background:var(--bg);border:1px solid var(--bd);border-radius:6px;padding:10px;font-family:var(--mono);font-size:11.5px;color:var(--tx);min-height:180px;overflow:auto;line-height:1.8;white-space:pre-wrap}
+    .info-box{background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.2);border-radius:6px;padding:8px 12px;font-size:12px;color:var(--bl);margin-bottom:.75rem;line-height:1.6}
+    .url-bar{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--bd);border-radius:6px;padding:7px 12px;margin-bottom:.75rem;font-family:var(--mono);font-size:12px}
+    .url-m{color:var(--g);font-weight:700}
+    .live-toggle{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--txd);margin-bottom:1rem}
+    .tw{position:relative;width:36px;height:20px;cursor:pointer}
+    .tw input{opacity:0;width:0;height:0;position:absolute}
+    .sl2{position:absolute;inset:0;background:var(--bd);border-radius:10px;transition:.3s}
+    .sl2::before{content:'';position:absolute;height:14px;width:14px;left:3px;bottom:3px;background:var(--txd);border-radius:50%;transition:.3s}
+    input:checked+.sl2{background:var(--gd)}
+    input:checked+.sl2::before{transform:translateX(16px);background:var(--g)}
+    /* ARCH */
+    .arch-section{background:var(--bg);border-top:1px solid var(--bd)}
+    .arch-grid{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:start}
+    .arch-layer{display:flex;align-items:center;gap:1rem;padding:1rem 1.5rem;border:1px solid var(--bd);border-radius:8px;margin-bottom:8px;background:var(--bg2);transition:border-color .3s;cursor:default;position:relative;overflow:hidden}
+    .arch-layer::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--g);opacity:0;transition:opacity .3s}
+    .arch-layer:hover{border-color:var(--gd)}.arch-layer:hover::before{opacity:1}
+    .arch-icon{font-size:20px}.arch-name{color:#e8f5e8;font-family:var(--mono);font-weight:700;flex:1;font-size:13px}.arch-tech{color:var(--txd);font-family:var(--mono);font-size:11px}
+    .arch-arrow{text-align:center;color:var(--gd);font-size:18px;margin:-2px 0;opacity:.5}
+    .feat-list{display:flex;flex-direction:column;gap:1.5rem}
+    .feat{display:flex;gap:1rem}
+    .feat-icon{width:40px;height:40px;border:1px solid var(--bd);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;background:var(--bg2)}
+    .feat-title{font-size:15px;font-weight:500;color:#e8f5e8;margin-bottom:4px}.feat-desc{font-size:13px;color:var(--txd);line-height:1.6}
+    /* SEC */
+    .sec-section{background:var(--bg2);border-top:1px solid var(--bd)}
+    .sec-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--bd);border:1px solid var(--bd);border-radius:12px;overflow:hidden}
+    .sec-item{background:var(--bg2);padding:2rem;transition:background .2s}.sec-item:hover{background:var(--bg3)}
+    .sec-icon{font-size:1.5rem;margin-bottom:1rem}.sec-title{font-size:15px;font-weight:500;color:#e8f5e8;margin-bottom:.5rem}.sec-desc{font-size:13px;color:var(--txd);line-height:1.6}
+    /* STACK */
+    .stack-section{background:var(--bg);border-top:1px solid var(--bd)}
+    .stack-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:1rem;margin-top:2.5rem}
+    .stack-item{background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:1.5rem 1rem;text-align:center;transition:border-color .2s,transform .2s}
+    .stack-item:hover{border-color:var(--gd);transform:translateY(-4px)}
+    .stack-emoji{font-size:2rem;margin-bottom:.5rem}.stack-name{font-family:var(--mono);font-size:12px;color:#e8f5e8;font-weight:700}.stack-ver{font-family:var(--mono);font-size:10px;color:var(--txd);margin-top:2px}
+    /* CTA */
+    .cta{text-align:center;padding:6rem 2rem;background:var(--bg);border-top:1px solid var(--bd);position:relative;z-index:1}
+    .cta-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(0,232,122,.06) 0%,transparent 70%);pointer-events:none}
+    footer{border-top:1px solid var(--bd);padding:2rem;text-align:center;font-family:var(--mono);font-size:12px;color:var(--txd);position:relative;z-index:1}
+    footer a{color:var(--g);text-decoration:none}
+    .reveal{opacity:0;transform:translateY(24px);transition:opacity .7s,transform .7s}.reveal.in{opacity:1;transform:none}
+    .jk{color:var(--bl)}.jstr{color:var(--am)}.jnum{color:#f97316}.jbool{color:var(--re)}.jnull{color:var(--txd)}
+    @media(max-width:900px){.hero{grid-template-columns:1fr;padding:7rem 1.5rem 4rem;gap:2.5rem}.arch-grid{grid-template-columns:1fr}.sec-grid{grid-template-columns:1fr}.exp-wrap{grid-template-columns:1fr}.exp-sidebar{display:none}.exp-body{grid-template-columns:1fr}.stats{flex-wrap:wrap}.si{padding:4rem 1.5rem}}
+  </style>
+</head>
+<body>
+<nav>
+  <a class="nav-logo" href="#">🍔 <span>restaurant-</span>api-platform</a>
+  <div class="nav-links">
+    <a href="#explorer">API Explorer</a>
+    <a href="#architecture">Architecture</a>
+    <a href="#security">Security</a>
+    <a class="nav-cta" href="https://github.com/YOUR_USERNAME/restaurant-api-platform" target="_blank">GitHub ↗</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="reveal">
+    <div class="eyebrow">Senior PHP · CodeIgniter 4</div>
+    <h1>Multi-tenant<br/><em>Restaurant</em><br/>API Platform</h1>
+    <div class="badges">
+      <span class="badge bg">PHP 8.2</span><span class="badge bg">CodeIgniter 4</span><span class="badge bb">JWT + Rotation</span><span class="badge bb">Redis</span><span class="badge bg">Docker</span><span class="badge bg">PHPUnit</span>
+    </div>
+    <p class="hero-desc">Production-grade REST API with Repository pattern, Service layer, RBAC, multi-tenant isolation, token rotation, rate limiting and a full test suite. Zero business logic in controllers.</p>
+    <div class="hero-btns">
+      <a class="btn-p" href="#explorer">▶ Try the API Explorer</a>
+      <a class="btn-s" href="https://github.com/YOUR_USERNAME/restaurant-api-platform" target="_blank">⌥ Source Code</a>
+    </div>
+  </div>
+  <div class="reveal" style="transition-delay:.2s">
+    <div class="terminal">
+      <div class="tbar"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div><span class="ttitle">restaurant-api — demo</span></div>
+      <div class="tbody" id="terminal"></div>
+    </div>
+  </div>
+</section>
+
+<div class="stats">
+  <div class="stat"><div class="stat-n">4</div><div class="stat-l">User Roles</div></div>
+  <div class="stat"><div class="stat-n">22+</div><div class="stat-l">Endpoints</div></div>
+  <div class="stat"><div class="stat-n">6</div><div class="stat-l">Order States</div></div>
+  <div class="stat"><div class="stat-n">JWT</div><div class="stat-l">+ Rotation</div></div>
+  <div class="stat"><div class="stat-n">∞</div><div class="stat-l">Tenants</div></div>
+</div>
+
+<!-- EXPLORER -->
+<section class="explorer" id="explorer">
+  <div class="si">
+    <div class="sl reveal">Interactive</div>
+    <h2 class="reveal">API Explorer</h2>
+    <p class="sd reveal">Test every endpoint right here. Simulated responses are production-accurate — identical format to what the real server returns. Toggle to Live Mode when you have a Railway URL.</p>
+    <div class="reveal" style="transition-delay:.1s">
+      <div class="live-toggle">
+        <label class="tw"><input type="checkbox" id="live-mode" onchange="toggleLive()"/><span class="sl2"></span></label>
+        <span id="mode-lbl">Mock mode — works without a server</span>
+        <span id="url-input" style="display:none;margin-left:.5rem">
+          <input id="api-url" type="text" placeholder="https://your-app.up.railway.app" style="background:var(--bg);border:1px solid var(--bd);border-radius:5px;padding:5px 10px;font-family:var(--mono);font-size:12px;color:var(--tx);outline:none;width:290px"/>
+        </span>
+      </div>
+      <div class="exp-wrap">
+        <div class="exp-sidebar">
+          <div class="exp-gt">Auth</div>
+          <div class="exp-ep active" onclick="sel('login',this)"><span class="m POST">POST</span><span class="ep-p">/auth/login</span></div>
+          <div class="exp-ep" onclick="sel('me',this)"><span class="m GET">GET</span><span class="ep-p">/auth/me</span></div>
+          <div class="exp-ep" onclick="sel('refresh',this)"><span class="m POST">POST</span><span class="ep-p">/auth/refresh</span></div>
+          <div class="exp-gt">Orders</div>
+          <div class="exp-ep" onclick="sel('olist',this)"><span class="m GET">GET</span><span class="ep-p">/orders</span></div>
+          <div class="exp-ep" onclick="sel('ocreate',this)"><span class="m POST">POST</span><span class="ep-p">/orders</span></div>
+          <div class="exp-ep" onclick="sel('ostatus',this)"><span class="m PUT">PUT</span><span class="ep-p">/orders/:id/status</span></div>
+          <div class="exp-ep" onclick="sel('otimeline',this)"><span class="m GET">GET</span><span class="ep-p">/orders/:id/timeline</span></div>
+          <div class="exp-gt">Products</div>
+          <div class="exp-ep" onclick="sel('plist',this)"><span class="m GET">GET</span><span class="ep-p">/products</span></div>
+          <div class="exp-ep" onclick="sel('pcreate',this)"><span class="m POST">POST</span><span class="ep-p">/products</span></div>
+          <div class="exp-gt">Reports</div>
+          <div class="exp-ep" onclick="sel('rsales',this)"><span class="m GET">GET</span><span class="ep-p">/reports/sales</span></div>
+          <div class="exp-ep" onclick="sel('rtop',this)"><span class="m GET">GET</span><span class="ep-p">/reports/top-products</span></div>
+        </div>
+        <div class="exp-main">
+          <div class="exp-header">
+            <div><div class="exp-title" id="ep-title">POST /api/v1/auth/login</div><div class="exp-desc" id="ep-desc">Authenticate and receive a JWT access + refresh token pair.</div></div>
+            <button class="run-btn" id="run-btn" onclick="run()">▶ Send Request</button>
+          </div>
+          <div class="exp-body">
+            <div class="exp-pane">
+              <div class="pane-title">Request</div>
+              <div class="url-bar"><span class="url-m" id="url-m">POST</span><span style="color:var(--txd);font-size:12px">/api/v1<span id="url-p">/auth/login</span></span></div>
+              <div id="info-area"></div>
+              <textarea id="req-body" spellcheck="false">{
+  "email": "manager@burgerhouse.com",
+  "password": "password123"
+}</textarea>
+            </div>
+            <div class="exp-pane">
+              <div class="pane-title">Response <span class="sb s200" id="sbadge">200 OK</span> <span style="font-family:var(--mono);font-size:10px;color:var(--txd);margin-left:auto" id="rtime"></span></div>
+              <div class="res-box" id="res-box">Click "Send Request" to see the response.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ARCHITECTURE -->
+<section class="arch-section" id="architecture">
+  <div class="si">
+    <div class="arch-grid">
+      <div class="reveal">
+        <div class="sl">Design</div>
+        <h2>Layered Architecture</h2>
+        <p class="sd">Every layer has a single responsibility. Controllers handle HTTP. Services handle business rules. Repositories handle data. No shortcuts.</p>
+        <div class="feat-list">
+          <div class="feat"><div class="feat-icon">🏗️</div><div><div class="feat-title">Repository Pattern</div><div class="feat-desc">All DB queries behind interfaces. Services work against contracts — unit tests run with mocks, no real database needed.</div></div></div>
+          <div class="feat"><div class="feat-icon">⚙️</div><div><div class="feat-title">State Machine</div><div class="feat-desc">Order status transitions are enforced server-side. pending→confirmed→preparing→ready→delivered. Invalid transitions return HTTP 422.</div></div></div>
+          <div class="feat"><div class="feat-icon">📡</div><div><div class="feat-title">Domain Events</div><div class="feat-desc">OrderStatusChanged decouples mutations from side effects. Kitchen notifications fire via listeners, not inline code.</div></div></div>
+        </div>
+      </div>
+      <div class="reveal" style="transition-delay:.15s;padding-top:3.5rem">
+        <div class="arch-layer"><span class="arch-icon">🌐</span><span class="arch-name">HTTP Request</span><span class="arch-tech">REST · JSON</span></div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-layer"><span class="arch-icon">🔒</span><span class="arch-name">Filters</span><span class="arch-tech">JWT · RBAC · RateLimit</span></div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-layer"><span class="arch-icon">🎮</span><span class="arch-name">Controller</span><span class="arch-tech">Validation · Response shape</span></div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-layer"><span class="arch-icon">⚙️</span><span class="arch-name">Service</span><span class="arch-tech">Business rules · Events</span></div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-layer"><span class="arch-icon">🗄️</span><span class="arch-name">Repository</span><span class="arch-tech">Query Builder · Transactions</span></div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-layer"><span class="arch-icon">💾</span><span class="arch-name">MySQL + Redis</span><span class="arch-tech">Persistence · Cache · Rate limit</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECURITY -->
+<section class="sec-section" id="security">
+  <div class="si">
+    <div class="sl reveal">Security</div>
+    <h2 class="reveal">Defence in Depth</h2>
+    <p class="sd reveal">Six independent layers. An attacker must bypass all of them.</p>
+    <div class="sec-grid reveal" style="transition-delay:.1s">
+      <div class="sec-item"><div class="sec-icon">🔑</div><div class="sec-title">JWT + Token Rotation</div><div class="sec-desc">Access tokens expire in 15 min. Refresh tokens rotate on each use — stolen tokens revoked via Redis JTI blocklist.</div></div>
+      <div class="sec-item"><div class="sec-icon">👤</div><div class="sec-title">Role-Based Access Control</div><div class="sec-desc">4 roles: superadmin · manager · cashier · kitchen. Every route declares required roles. Violations return 403.</div></div>
+      <div class="sec-item"><div class="sec-icon">🏢</div><div class="sec-title">Tenant Isolation</div><div class="sec-desc">Users locked to their tenant at filter AND service layer. Cross-tenant reads are impossible even with a valid JWT.</div></div>
+      <div class="sec-item"><div class="sec-icon">🚦</div><div class="sec-title">Rate Limiting</div><div class="sec-desc">60 req/min per IP backed by Redis. Atomic increments — accurate under concurrent PHP workers.</div></div>
+      <div class="sec-item"><div class="sec-icon">🛡️</div><div class="sec-title">Input Validation</div><div class="sec-desc">CI4 validation on every mutating endpoint with explicit JSON body. SQL injection impossible via parameterised queries.</div></div>
+      <div class="sec-item"><div class="sec-icon">🔐</div><div class="sec-title">Password Hashing</div><div class="sec-desc">Bcrypt via password_hash() auto-applied in UserModel beforeInsert hooks. Plain text never touches the DB.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- STACK -->
+<section class="stack-section">
+  <div class="si">
+    <div class="sl reveal">Stack</div><h2 class="reveal">Technologies</h2>
+    <div class="stack-grid reveal" style="transition-delay:.1s">
+      <div class="stack-item"><div class="stack-emoji">🐘</div><div class="stack-name">PHP</div><div class="stack-ver">8.2</div></div>
+      <div class="stack-item"><div class="stack-emoji">🔥</div><div class="stack-name">CodeIgniter</div><div class="stack-ver">4.4</div></div>
+      <div class="stack-item"><div class="stack-emoji">🐬</div><div class="stack-name">MySQL</div><div class="stack-ver">8.0</div></div>
+      <div class="stack-item"><div class="stack-emoji">⚡</div><div class="stack-name">Redis</div><div class="stack-ver">7.0</div></div>
+      <div class="stack-item"><div class="stack-emoji">🐳</div><div class="stack-name">Docker</div><div class="stack-ver">Compose</div></div>
+      <div class="stack-item"><div class="stack-emoji">🧪</div><div class="stack-name">PHPUnit</div><div class="stack-ver">10.0</div></div>
+      <div class="stack-item"><div class="stack-emoji">🔑</div><div class="stack-name">JWT</div><div class="stack-ver">firebase/php-jwt</div></div>
+      <div class="stack-item"><div class="stack-emoji">🚂</div><div class="stack-name">Railway</div><div class="stack-ver">Deploy</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="cta-glow"></div>
+  <div class="sl reveal">Open source</div>
+  <h2 class="reveal">See every line of code.</h2>
+  <p style="font-size:17px;color:var(--txd);margin-bottom:2.5rem" class="reveal">Clone · docker-compose up · working API in 5 minutes.</p>
+  <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap" class="reveal">
+    <a class="btn-p" href="https://github.com/YOUR_USERNAME/restaurant-api-platform" target="_blank">View on GitHub</a>
+    <a class="btn-s" href="#explorer">Try the Explorer ↑</a>
+  </div>
+</section>
+
+<footer><p>PHP 8.2 · CodeIgniter 4 · MySQL · Redis · Docker · PHPUnit &nbsp;·&nbsp; <a href="https://github.com/YOUR_USERNAME/restaurant-api-platform" target="_blank">github.com/YOUR_USERNAME/restaurant-api-platform</a></p></footer>
+
+<script>
+const EPS={
+  login:{method:'POST',path:'/auth/login',title:'POST /api/v1/auth/login',desc:'Authenticate and receive a JWT access + refresh token pair.',info:null,body:'{\n  "email": "manager@burgerhouse.com",\n  "password": "password123"\n}',status:'200 OK',sc:'s200',mock:{status:'success',message:'Login successful.',data:{access_token:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsInRlbmFudF9pZCI6MSwicm9sZSI6Im1hbmFnZXIiLCJ0eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzA5OTAwMDAwLCJqdGkiOiJhYmMxMjMifQ.SIGNATURE',refresh_token:'eyJhbGciOiJIUzI1NiJ9.REFRESH.SIGNATURE',token_type:'Bearer',expires_in:900,user:{id:2,name:'Ana García',email:'manager@burgerhouse.com',role:'manager',tenant_id:1}}}},
+  me:{method:'GET',path:'/auth/me',title:'GET /api/v1/auth/me',desc:'Returns the authenticated user profile.',info:'🔒 Requires: Authorization: Bearer {access_token}',body:'// No body needed — send the Authorization header',status:'200 OK',sc:'s200',mock:{status:'success',message:'OK',data:{id:2,name:'Ana García',email:'manager@burgerhouse.com',role:'manager',tenant_id:1}}},
+  refresh:{method:'POST',path:'/auth/refresh',title:'POST /api/v1/auth/refresh',desc:'Exchange refresh token for a new token pair (rotation — old token revoked).',info:null,body:'{\n  "refresh_token": "eyJhbGciOiJIUzI1NiJ9.REFRESH.SIGNATURE"\n}',status:'200 OK',sc:'s200',mock:{status:'success',message:'Token refreshed.',data:{access_token:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.NEW_PAYLOAD.SIGNATURE',refresh_token:'eyJhbGciOiJIUzI1NiJ9.NEW_REFRESH.SIGNATURE',token_type:'Bearer',expires_in:900}}},
+  olist:{method:'GET',path:'/orders',title:'GET /api/v1/orders',desc:'Paginated orders for the tenant. Supports ?status=pending&from=2024-01-01&page=1',info:'🔒 Requires: Authorization: Bearer {access_token}',body:'// Query params: ?status=pending&page=1&limit=20',status:'200 OK',sc:'s200',mock:{status:'success',message:'OK',data:[{id:43,status:'pending',total:'21.30',customer_name:'Luis Martínez',created_at:'2024-01-20 14:45:00'},{id:42,status:'delivered',total:'35.40',customer_name:'Luis Martínez',created_at:'2024-01-20 12:10:00'},{id:41,status:'preparing',total:'18.90',customer_name:'Luis Martínez',created_at:'2024-01-20 11:55:00'}],meta:{total:127,page:1,per_page:20,last_page:7}}},
+  ocreate:{method:'POST',path:'/orders',title:'POST /api/v1/orders',desc:'Create a new order. Products validated, total calculated server-side.',info:'🔒 Requires: Authorization: Bearer {access_token}',body:'{\n  "items": [\n    { "product_id": 1, "quantity": 2 },\n    { "product_id": 4, "quantity": 1 }\n  ],\n  "notes": "No onions please"\n}',status:'201 Created',sc:'s201',mock:{status:'success',message:'Order placed successfully.',data:{id:44,status:'pending',total:'21.30',notes:'No onions please',created_at:'2024-01-20 14:50:00',items:[{product_name:'Classic Smash Burger',quantity:2,unit_price:'8.90',subtotal:'17.80'},{product_name:'Sweet Potato Fries',quantity:1,unit_price:'3.50',subtotal:'3.50'}]}}},
+  ostatus:{method:'PUT',path:'/orders/:id/status',title:'PUT /api/v1/orders/:id/status',desc:'Transition order through state machine. Invalid transitions return 422.',info:'🔒 Valid: confirmed · preparing · ready · delivered · cancelled',body:'{\n  "status": "confirmed"\n}',status:'200 OK',sc:'s200',mock:{status:'success',message:'Order status updated.',data:{id:44,status:'confirmed',total:'21.30',updated_at:'2024-01-20 14:51:00'}}},
+  otimeline:{method:'GET',path:'/orders/:id/timeline',title:'GET /api/v1/orders/:id/timeline',desc:'Full audit trail of every status change with timestamps and user names.',info:'🔒 Requires: Authorization: Bearer {access_token}',body:'// No body needed',status:'200 OK',sc:'s200',mock:{status:'success',message:'OK',data:[{status:'pending',changed_by_name:'Luis Martínez',note:'Order created',created_at:'2024-01-20 14:50:00'},{status:'confirmed',changed_by_name:'Ana García',note:null,created_at:'2024-01-20 14:51:00'},{status:'preparing',changed_by_name:'Ana García',note:null,created_at:'2024-01-20 14:52:00'}]}},
+  plist:{method:'GET',path:'/products',title:'GET /api/v1/products',desc:'Paginated product catalog for the tenant. Supports ?category=burgers&search=smash',info:'🔒 Requires: Authorization: Bearer {access_token}',body:'// Query params: ?category=burgers&page=1&limit=20',status:'200 OK',sc:'s200',mock:{status:'success',message:'OK',data:[{id:1,name:'Classic Smash Burger',sku:'BH-001',category:'burgers',price:'8.90',is_available:1},{id:2,name:'Double Bacon Burger',sku:'BH-002',category:'burgers',price:'11.50',is_available:1},{id:4,name:'Sweet Potato Fries',sku:'BH-004',category:'sides',price:'3.50',is_available:1}],meta:{total:8,page:1,per_page:20,last_page:1}}},
+  pcreate:{method:'POST',path:'/products',title:'POST /api/v1/products',desc:'Create a product in the tenant catalog. Requires manager or superadmin role.',info:'🔒 Requires manager or superadmin role',body:'{\n  "name": "Truffle Wagyu Burger",\n  "sku": "BH-010",\n  "category": "burgers",\n  "price": 16.90,\n  "description": "100g wagyu, truffle mayo, aged cheddar",\n  "is_available": 1\n}',status:'201 Created',sc:'s201',mock:{status:'success',message:'Product created.',data:{id:10,tenant_id:1,name:'Truffle Wagyu Burger',sku:'BH-010',category:'burgers',price:'16.90',is_available:1,created_at:'2024-01-20 14:55:00'}}},
+  rsales:{method:'GET',path:'/reports/sales',title:'GET /api/v1/reports/sales',desc:'Revenue grouped by day. Supports ?period=monthly|weekly|daily and ?from=&to=',info:'🔒 Requires manager or superadmin · Cached 5 min in Redis',body:'// Query params: ?period=monthly',status:'200 OK',sc:'s200',mock:{status:'success',message:'OK',data:{period:{from:'2023-12-21',to:'2024-01-20'},summary:{total_revenue:'4820.30',total_orders:312,avg_per_day:'160.68'},daily_breakdown:[{date:'2024-01-18',total_orders:18,revenue:'287.40',avg_order_value:'15.97'},{date:'2024-01-19',total_orders:22,revenue:'341.90',avg_order_value:'15.54'},{date:'2024-01-20',total_orders:14,revenue:'198.60',avg_order_value:'14.19'}]}}},
+  rtop:{method:'GET',path:'/reports/top-products',title:'GET /api/v1/reports/top-products',desc:'Top N products by revenue in a period. Supports ?period=monthly&limit=10',info:'🔒 Requires manager or superadmin · Cached 5 min in Redis',body:'// Query params: ?period=monthly&limit=5',status:'200 OK',sc:'s200',mock:{status:'success',message:'OK',data:[{id:2,name:'Double Bacon Burger',sku:'BH-002',category:'burgers',units_sold:'184',revenue:'2116.00'},{id:1,name:'Classic Smash Burger',sku:'BH-001',category:'burgers',units_sold:'231',revenue:'2055.90'},{id:3,name:'Crispy Chicken Sandwich',sku:'BH-003',category:'sandwiches',units_sold:'178',revenue:'1637.60'}]}}
+};
+let cur='login',live=false;
+function sel(k,el){cur=k;const ep=EPS[k];document.querySelectorAll('.exp-ep').forEach(e=>e.classList.remove('active'));el.classList.add('active');document.getElementById('ep-title').textContent=ep.title;document.getElementById('ep-desc').textContent=ep.desc;document.getElementById('url-m').textContent=ep.method;document.getElementById('url-p').textContent=ep.path;document.getElementById('req-body').value=ep.body;document.getElementById('res-box').textContent='Click "Send Request" to see the response.';document.getElementById('sbadge').textContent=ep.status;document.getElementById('sbadge').className='sb '+ep.sc;document.getElementById('rtime').textContent='';document.getElementById('info-area').innerHTML=ep.info?`<div class="info-box">${ep.info}</div>`:'';}
+function toggleLive(){live=document.getElementById('live-mode').checked;document.getElementById('mode-lbl').textContent=live?'Live mode (Railway URL below)':'Mock mode — works without a server';document.getElementById('url-input').style.display=live?'inline':'';}
+async function run(){
+  const ep=EPS[cur],btn=document.getElementById('run-btn'),rb=document.getElementById('res-box'),badge=document.getElementById('sbadge'),timer=document.getElementById('rtime');
+  btn.classList.add('loading');btn.textContent='Sending...';rb.textContent='';
+  const t=Date.now();
+  if(live){
+    const base=(document.getElementById('api-url').value||'').replace(/\/$/,'');
+    if(!base){rb.textContent='⚠ Enter your Railway URL above.';btn.classList.remove('loading');btn.innerHTML='▶ Send Request';return;}
+    try{
+      const body=ep.method!=='GET'&&!ep.body.startsWith('//')?ep.body:undefined;
+      const r=await fetch(base+'/api/v1'+ep.path.replace(':id','1'),{method:ep.method,headers:{'Content-Type':'application/json'},body});
+      const j=await r.json();timer.textContent=`${Date.now()-t}ms`;badge.textContent=r.status+' '+r.statusText;badge.className='sb '+(r.ok?(r.status===201?'s201':'s200'):'s401');rb.innerHTML=hl(JSON.stringify(j,null,2));
+    }catch(e){rb.textContent='⚠ Network error: '+e.message;badge.textContent='Error';badge.className='sb s401';}
+  }else{
+    await new Promise(r=>setTimeout(r,80+Math.random()*150));
+    timer.textContent=`${Math.round(Date.now()-t)}ms`;badge.textContent=ep.status;badge.className='sb '+ep.sc;rb.innerHTML=hl(JSON.stringify(ep.mock,null,2));
+  }
+  btn.classList.remove('loading');btn.innerHTML='▶ Send Request';
+}
+function hl(j){return j.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,m=>{if(/^"/.test(m)){if(/:$/.test(m))return`<span class="jk">${m}</span>`;return`<span class="jstr">${m}</span>`;}if(/true|false/.test(m))return`<span class="jbool">${m}</span>`;if(/null/.test(m))return`<span class="jnull">${m}</span>`;return`<span class="jnum">${m}</span>`;});}
+
+// TERMINAL
+const lines=[
+  {d:0,t:'cmt',c:'# Authenticate as manager'},
+  {d:300,t:'cmd',c:'curl -X POST /api/v1/auth/login \\'},
+  {d:440,t:'cmd',c:"  -d '{\"email\":\"manager@burgerhouse.com\",\"password\":\"password123\"}'"},
+  {d:750,t:'blank'},{d:900,t:'json',c:'{ <k>"status"</k>: <s>"success"</s>, <k>"data"</k>: { <k>"access_token"</k>: <s>"eyJhbG..."</s>,'},
+  {d:1050,t:'json',c:'    <k>"expires_in"</k>: <n>900</n>, <k>"user"</k>: { <k>"role"</k>: <s>"manager"</s> } } }'},
+  {d:1350,t:'blank'},{d:1600,t:'cmt',c:'# Create an order'},
+  {d:1800,t:'cmd',c:'curl -X POST /api/v1/orders -H "Authorization: Bearer eyJ..." \\'},
+  {d:1950,t:'cmd',c:"  -d '{\"items\":[{\"product_id\":1,\"quantity\":2}]}'"},
+  {d:2300,t:'tok',c:'✓  201 Created — Order #44 placed — total $17.80'},
+  {d:2600,t:'blank'},{d:2850,t:'cmt',c:'# Advance state machine: pending → confirmed'},
+  {d:3050,t:'cmd',c:'curl -X PUT /api/v1/orders/44/status \\'},
+  {d:3200,t:'cmd',c:"  -d '{\"status\":\"confirmed\"}'"},
+  {d:3500,t:'tok',c:'✓  200 OK — kitchen notified via event listener'},
+  {d:3800,t:'blank'},{d:4050,t:'cmt',c:'# Invalid transition — blocked by state machine'},
+  {d:4250,t:'cmd',c:"curl -X PUT /api/v1/orders/44/status -d '{\"status\":\"pending\"}'"},
+  {d:4600,t:'err',c:'✗  422 — confirmed → pending is not a valid transition'},
+  {d:4900,t:'cursor'},
+];
+const term=document.getElementById('terminal');
+lines.forEach(l=>{
+  setTimeout(()=>{
+    if(l.t==='cursor'){const s=document.createElement('span');s.innerHTML='<span class="cursor"></span>';term.appendChild(s);return;}
+    const d=document.createElement('div');d.className='tl';
+    if(l.t==='blank'){d.className+=' tb';d.style.opacity=1;}
+    else if(l.t==='cmt')d.innerHTML=`<span class="tp">$</span><span class="tcm">${l.c}</span>`;
+    else if(l.t==='cmd')d.innerHTML=`<span class="tp"> </span><span class="tc">${l.c}</span>`;
+    else if(l.t==='tok')d.innerHTML=`<span class="tok">${l.c}</span>`;
+    else if(l.t==='err')d.innerHTML=`<span style="color:var(--re)">${l.c}</span>`;
+    else if(l.t==='json'){const h=l.c.replace(/<k>/g,'<span class="tk">').replace(/<\/k>/g,'</span>').replace(/<s>/g,'<span class="ts">').replace(/<\/s>/g,'</span>').replace(/<n>/g,'<span class="tn">').replace(/<\/n>/g,'</span>');d.innerHTML=`<span class="tp"> </span><span style="color:#e8f5e8">${h}</span>`;}
+    term.appendChild(d);term.scrollTop=term.scrollHeight;
+  },l.d);
+});
+const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');obs.unobserve(e.target);}});},{threshold:0.1});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>

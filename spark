@@ -1,0 +1,14 @@
+#!/usr/bin/env php
+<?php
+
+define('SPARKED', true);
+
+require __DIR__ . '/app/Config/Paths.php';
+
+$paths = new Config\Paths();
+
+chdir(__DIR__);
+
+require $paths->systemDirectory . '/Boot.php';
+
+exit(CodeIgniter\Boot::bootSpark($paths));
