@@ -20,7 +20,11 @@ class JWTHandler
 
     public function __construct()
     {
-        $this->secret = env('JWT_SECRET', 'change-me-in-production');
+        $this->secret = env('JWT_SECRET');
+
+        if (empty($this->secret) || $this->secret === 'change-me-in-production') {
+            throw new \RuntimeException('JWT_SECRET is not set or using insecure default. Check your .env file.');
+        }
     }
 
     /** Issue a short-lived access token. */

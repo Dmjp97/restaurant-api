@@ -20,6 +20,7 @@ class Filters extends BaseFilters
         'jwt'       => JWTAuthFilter::class,
         'role'      => RoleFilter::class,
         'rateLimit' => RateLimitFilter::class,
+        'contentType' => \App\Filters\ContentTypeFilter::class,
     ];
 
     /**
@@ -28,16 +29,37 @@ class Filters extends BaseFilters
      */
     public array $globals = [
         'before' => [
-            // Rate-limit every route; auth endpoints are excluded (they have their own throttling via auth failures)
-            'rateLimit' => ['except' => ['api/v1/auth/login', 'api/v1/auth/refresh']],
+            'contentType',
+            // Apply a default rate limit globally
+            'rateLimit',
         ],
         'after' => [
-            // rateLimit after() injects X-RateLimit-* headers into every response
             'rateLimit',
         ],
     ];
 
+    /**
+     * List of filter aliases that should run on any
+     * HTTP method (GET, POST, etc.).
+     *
+     * Example:
+     * 'post' => ['foo', 'bar']
+     *
+     * If you use this, you should disable auto-routing because auto-routing
+     * permits any HTTP method to access a controller. Accessing the controller
+     * with a method you don’t expect could bypass the filter.
+     */
     public array $methods = [];
 
-    public array $filters = [];
+    /**
+     * List of filter aliases that should run on special
+     * HTTP method (GET, POST, etc.) or HTTP status code.
+     */
+    public array $filters = [
+        // Strict rate limit for authentication (5 requests per minute)
+        'rateLimit' => [
+            'before' => ['api/v1/auth/login', 'api/v1/auth/refresh'],
+            'arguments' => ['5']
+        ],
+    ];
 }

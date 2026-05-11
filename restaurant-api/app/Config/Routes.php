@@ -55,6 +55,10 @@ $routes->group('api/v1', ['namespace' => 'App\Controllers\Api\V1'], function ($r
             $routes->get('sales',        'ReportController::sales');
             $routes->get('top-products', 'ReportController::topProducts');
             $routes->get('orders-by-status', 'ReportController::ordersByStatus');
+        });
+
+        // ── Admin-only Reports ──
+        $routes->group('reports', ['filter' => 'role:superadmin'], function ($routes) {
             $routes->get('revenue-by-tenant', 'ReportController::revenueByTenant');
         });
 

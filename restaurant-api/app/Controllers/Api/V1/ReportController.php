@@ -47,6 +47,10 @@ class ReportController extends BaseApiController
     /** GET /api/v1/reports/revenue-by-tenant  (superadmin only) */
     public function revenueByTenant()
     {
+        if ($this->authUser()['role'] !== 'superadmin') {
+            return $this->error('Access denied. Superadmin role required.', 403);
+        }
+
         $period = $this->request->getGet('period') ?? 'monthly';
         return $this->success($this->reportService->revenueByTenant($period));
     }

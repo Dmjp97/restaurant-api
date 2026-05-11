@@ -47,7 +47,7 @@ class JWTAuthFilter implements FilterInterface
             service('auth')->setUser($user);
 
         } catch (\Exception $e) {
-            return $this->unauthorized($e->getMessage());
+            return $this->unauthorized('Invalid or expired token.');
         }
     }
 
